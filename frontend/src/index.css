@@ -1,0 +1,108 @@
+
+ @import "tailwindcss";
+
+@theme {
+  /* ---- Color tokens ---- */
+  --color-ink: #0b0f14;          /* primary dark background */
+  --color-ink-soft: #121924;     /* elevated dark surface */
+  --color-ink-line: #202a38;     /* dark hairline / border */
+  --color-paper: #f7f5f0;        /* light background */
+  --color-paper-soft: #ffffff;   /* light elevated surface */
+  --color-paper-line: #e7e3d8;   /* light hairline / border */
+
+  --color-route: #ffb020;        /* primary accent - "route amber" */
+  --color-route-dim: #cc8c19;
+  --color-signal: #1fb6a6;       /* secondary accent - verified/success teal */
+  --color-signal-dim: #17877a;
+  --color-alert: #ff6b57;        /* error / warning coral */
+
+  --color-slate: #5b6472;        /* muted text on light */
+  --color-mist: #9aa5b3;         /* muted text on dark */
+
+  
+   /* Poppins poore project ke normal text ke liye */
+  --font-body: "Poppins", ui-sans-serif, system-ui, sans-serif;
+
+  /* Poppins headings ke liye */
+  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+
+  /* Code font */
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+
+
+
+ @layer base {
+  html {
+    font-family: var(--font-body);
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+  }
+
+  /* Dashboard headings */
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* Buttons, inputs aur forms bhi Poppins me */
+  button,
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+  }
+
+  ::selection {
+    background-color: var(--color-route);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-route);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  .route-dash {
+    stroke-dasharray: 6 8;
+  }
+}
+
+/* Register page moving text animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  display: inline-block;
+  animation: marquee 14s linear infinite;
+}

@@ -1,0 +1,9 @@
+process.env.NODE_ENV = 'test';
+process.env.PORT = '5001';
+process.env.CLIENT_URL = 'http://localhost:5173';
+process.env.MONGO_URI = 'mongodb://127.0.0.1:27017/drivehub_test'; // overridden by mongodb-memory-server in integration tests
+process.env.JWT_ACCESS_SECRET = 'test_access_secret';
+process.env.JWT_REFRESH_SECRET = 'test_refresh_secret';
+process.env.JWT_ACCESS_EXPIRES_IN = '15m';
+process.env.JWT_REFRESH_EXPIRES_IN = '7d';
+process.env.COOKIE_SECRET = 'test_cookie_secret';
