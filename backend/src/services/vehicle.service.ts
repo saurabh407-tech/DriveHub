@@ -1,6 +1,11 @@
 import { FilterQuery } from 'mongoose';
+import crypto from 'crypto';
 import { Vehicle, IVehicle, VehicleStatus } from '../models/Vehicle.model';
+import { User } from '../models/User.model';
 import { ApiError } from '../utils/ApiError';
+import { env } from '../config/env';
+import { logger } from '../utils/logger';
+import { sendEmail, ADMIN_NOTIFICATION_EMAIL, vehicleApprovalEmailTemplate } from './email.service';
 
 function slugify(text: string): string {
   return (
@@ -143,7 +148,56 @@ export async function submitForVerification(vehicleId: string, ownerId: string):
 
   vehicle.status = 'pending_verification';
   await vehicle.save();
+
+  sendVehicleApprovalEmailToAdmin(vehicle.id).catch((err) => {
+    logger.error('Failed to send vehicle approval email to admin', err);
+  });
+
   return vehicle;
+}
+
+export function generateVehicleActionToken(vehicleId: string, action: 'approve' | 'reject'): string {
+  return crypto
+    .createHmac('sha256', env.jwt.accessSecret)
+    .update(`${vehicleId}:${action}`)
+    .digest('hex');
+}
+
+export function verifyVehicleActionToken(vehicleId: string, action: string, token: string): boolean {
+  if (action !== 'approve' && action !== 'reject') return false;
+  const expected = generateVehicleActionToken(vehicleId, action);
+  try {
+    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(token));
+  } catch {
+    return false;
+  }
+}
+
+export async function sendVehicleApprovalEmailToAdmin(vehicleId: string): Promise<void> {
+  const vehicle = await Vehicle.findById(vehicleId);
+  if (!vehicle) return;
+  const owner = await User.findById(vehicle.owner).select('name email');
+
+  const approveToken = generateVehicleActionToken(vehicle.id, 'approve');
+  const rejectToken = generateVehicleActionToken(vehicle.id, 'reject');
+
+  const approveUrl = `${env.serverUrl}/api/v1/vehicles/${vehicle.id}/email-action?action=approve&token=${approveToken}`;
+  const rejectUrl = `${env.serverUrl}/api/v1/vehicles/${vehicle.id}/email-action?action=reject&token=${rejectToken}`;
+  const dashboardUrl = `${env.clientUrl}/admin/vehicles`;
+
+  const html = vehicleApprovalEmailTemplate({
+    vehicle,
+    owner,
+    approveUrl,
+    rejectUrl,
+    dashboardUrl,
+  });
+
+  await sendEmail({
+    to: ADMIN_NOTIFICATION_EMAIL,
+    subject: `🚗 [DriveHub] New Vehicle Submitted: ${vehicle.title} - Approval Needed`,
+    html,
+  });
 }
 
 interface SearchParams {

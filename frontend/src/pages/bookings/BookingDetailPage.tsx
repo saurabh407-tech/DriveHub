@@ -10,7 +10,7 @@ import { getOrCreateConversation } from '@/services/chatApi';
 import { useAppSelector } from '@/hooks/useAppRedux';
 import { getBooking, cancelBooking, startTrip, completeTrip } from '@/services/bookingApi';
 import type { Booking } from '@/services/bookingApi';
-import { getPaymentForBooking } from '@/services/paymentApi';
+import { getPaymentForBooking, downloadInvoicePdf } from '@/services/paymentApi';
 import type { PaymentRecord } from '@/services/paymentApi';
 import { BOOKING_STATUS_TONE, BOOKING_STATUS_LABEL } from '@/utils/bookingStatus';
 
@@ -30,6 +30,46 @@ export default function BookingDetailPage() {
   const [isCancelling, setIsCancelling] = useState(false);
   const [isChangingTripState, setIsChangingTripState] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+  const handleDownloadPdf = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    if (!id) return;
+    setIsDownloadingPdf(true);
+    try {
+      const blob = await downloadInvoicePdf(id, true);
+      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+      const objectUrl = URL.createObjectURL(pdfBlob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = `Invoice-${booking?.bookingCode || 'receipt'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 2000);
+    } catch {
+      if (payment?.invoiceUrl) {
+        window.open(payment.invoiceUrl, '_blank');
+      }
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
+
+  const handleViewPdf = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    if (!id) return;
+    try {
+      const blob = await downloadInvoicePdf(id, false);
+      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+      const objectUrl = URL.createObjectURL(pdfBlob);
+      window.open(objectUrl, '_blank');
+    } catch {
+      if (payment?.invoiceUrl) {
+        window.open(payment.invoiceUrl, '_blank');
+      }
+    }
+  };
 
   const refresh = useCallback(() => {
     if (!id) return;
@@ -109,10 +149,10 @@ export default function BookingDetailPage() {
   const viewerRole = user?.role === 'owner' ? 'owner' : 'customer';
 
   const mapPoints = [
-    booking.pickupLocation.lat != null && booking.pickupLocation.lng != null
+    booking.pickupLocation?.lat != null && booking.pickupLocation?.lng != null
       ? { lat: booking.pickupLocation.lat, lng: booking.pickupLocation.lng, label: 'Pickup', color: '#1fb6a6' }
       : null,
-    booking.dropLocation.lat != null && booking.dropLocation.lng != null
+    booking.dropLocation?.lat != null && booking.dropLocation?.lng != null
       ? { lat: booking.dropLocation.lat, lng: booking.dropLocation.lng, label: 'Drop-off', color: '#ffb020' }
       : null,
   ].filter((p): p is { lat: number; lng: number; label: string; color: string } => p !== null);
@@ -125,11 +165,47 @@ export default function BookingDetailPage() {
 
       <div className="mt-4 flex items-start justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-ink">{booking.vehicle.title}</h1>
+          <h1 className="font-display text-2xl font-semibold text-ink">{booking.vehicle?.title || 'Vehicle'}</h1>
           <p className="mt-1 text-sm text-slate">{booking.bookingCode}</p>
         </div>
         <Badge tone={BOOKING_STATUS_TONE[booking.status]}>{BOOKING_STATUS_LABEL[booking.status]}</Badge>
       </div>
+
+      {payment?.status === 'captured' && (
+        <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-signal/30 bg-signal/10 px-5 py-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="inline-block h-2.5 w-2.5 rounded-full bg-signal" />
+              <p className="font-semibold text-sm text-signal-dim">
+                Payment Confirmed & Verified (₹{booking.pricing?.totalAmount?.toLocaleString('en-IN')})
+              </p>
+            </div>
+            <p className="mt-1 text-xs text-slate">
+              {payment.razorpayPaymentId ? `Transaction: ${payment.razorpayPaymentId}` : 'Paid via Razorpay'}
+              {payment.invoiceNumber ? ` · Invoice: ${payment.invoiceNumber}` : ''}
+            </p>
+          </div>
+          {payment.invoiceUrl && (
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={handleViewPdf}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3.5 py-2 text-xs font-semibold text-ink shadow-sm border border-paper-line hover:bg-paper-soft transition-colors cursor-pointer"
+              >
+                👁️ View Receipt
+              </button>
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={isDownloadingPdf}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-ink text-white px-3.5 py-2 text-xs font-semibold shadow-sm hover:bg-ink/90 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {isDownloadingPdf ? 'Downloading...' : '⬇️ Download PDF'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {booking.status === 'pending_payment' && viewerRole === 'customer' && (
         <div className="mt-4 flex items-center justify-between rounded-lg bg-route/10 px-4 py-3">
@@ -168,9 +244,9 @@ export default function BookingDetailPage() {
               <dt className="text-slate">Drop-off</dt>
               <dd className="text-ink">{formatDate(booking.endDate)}</dd>
               <dt className="text-slate">Pickup address</dt>
-              <dd className="text-ink">{booking.pickupLocation.address}</dd>
+              <dd className="text-ink">{booking.pickupLocation?.address || 'Pickup location not specified'}</dd>
               <dt className="text-slate">Drop address</dt>
-              <dd className="text-ink">{booking.dropLocation.address}</dd>
+              <dd className="text-ink">{booking.dropLocation?.address || 'Drop location not specified'}</dd>
             </dl>
             <div className="mt-4">
               <TripMap points={mapPoints} />
@@ -186,7 +262,9 @@ export default function BookingDetailPage() {
             {conversationId ? (
               <ChatWindow conversationId={conversationId} />
             ) : (
-              <div className="h-28 animate-pulse rounded-2xl bg-ink/5" />
+              <div className="rounded-xl border border-paper-line bg-paper-soft p-4 text-xs text-slate">
+                Chat is unavailable for this booking.
+              </div>
             )}
           </div>
 
@@ -195,10 +273,10 @@ export default function BookingDetailPage() {
               {viewerRole === 'customer' ? 'Vehicle owner' : 'Customer'}
             </h2>
             <p className="mt-2 text-sm text-ink">
-              {(viewerRole === 'customer' ? booking.owner : booking.customer).name}
+              {(viewerRole === 'customer' ? booking.owner : booking.customer)?.name || 'User unavailable'}
             </p>
             <p className="text-sm text-slate">
-              {(viewerRole === 'customer' ? booking.owner : booking.customer).email}
+              {(viewerRole === 'customer' ? booking.owner : booking.customer)?.email || 'Not available'}
             </p>
           </div>
 
@@ -238,15 +316,16 @@ export default function BookingDetailPage() {
             </dl>
 
             {payment?.status === 'captured' && payment.invoiceUrl && (
-              <a
-                href={payment.invoiceUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-4 block rounded-lg bg-ink/5 px-3 py-2 text-center text-xs font-medium text-ink hover:bg-ink/10"
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={isDownloadingPdf}
+                className="mt-4 block w-full rounded-lg bg-ink/5 px-3 py-2 text-center text-xs font-medium text-ink hover:bg-ink/10 cursor-pointer disabled:opacity-50 transition-colors"
               >
-                Download invoice {payment.invoiceNumber ? `(${payment.invoiceNumber})` : ''}
-              </a>
-              
+                {isDownloadingPdf
+                  ? 'Downloading PDF...'
+                  : `Download PDF Invoice ${payment.invoiceNumber ? `(${payment.invoiceNumber})` : ''}`}
+              </button>
             )}
           </div>
 

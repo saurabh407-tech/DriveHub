@@ -23,6 +23,7 @@ import paymentRoutes from './routes/payment.routes';
 import chatRoutes from './routes/chat.routes';
 import notificationRoutes from './routes/notification.routes';
 import analyticsRoutes from './routes/analytics.routes';
+import contactRoutes from './routes/contact.routes';
 
 export function createApp(): Application {
   const app = express();
@@ -31,9 +32,26 @@ export function createApp(): Application {
 
   // ---- Security ----
   app.use(helmet());
+  const allowedOrigins = [
+    env.clientUrl,
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'http://localhost:8080',
+    'http://localhost:3000',
+  ];
   app.use(
     cors({
-      origin: env.clientUrl,
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (
+          allowedOrigins.includes(origin) ||
+          (!env.isProd && /^http:\/\/localhost:\d+$/.test(origin))
+        ) {
+          return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'));
+      },
       credentials: true,
     })
   );
@@ -73,6 +91,7 @@ export function createApp(): Application {
   app.use(`${API_PREFIX}/chat`, chatRoutes);
   app.use(`${API_PREFIX}/notifications`, notificationRoutes);
   app.use(`${API_PREFIX}/analytics`, analyticsRoutes);
+  app.use(`${API_PREFIX}/contact`, contactRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

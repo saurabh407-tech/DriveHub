@@ -28,11 +28,12 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 
 export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
   const { email, otp } = req.body;
-  const user = await authService.verifyEmailOtp(email, otp);
+  const { user, tokens } = await authService.verifyEmailOtp(email, otp);
+  setRefreshCookie(res, tokens.refreshToken);
   res.status(200).json({
     success: true,
-    message: 'Email verified successfully. You can now log in.',
-    data: { user },
+    message: 'Email verified successfully. Logged in.',
+    data: { user, accessToken: tokens.accessToken },
   });
 });
 

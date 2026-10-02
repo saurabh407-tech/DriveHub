@@ -40,33 +40,58 @@ export default function FeaturesPage() {
 
   return (
     <MarketingLayout>
-      <section className="mx-auto max-w-5xl px-6 py-20">
-        <span className="text-xs font-medium uppercase tracking-wider text-slate">Features</span>
-        <h1 className="mt-3 font-display text-3xl font-semibold text-ink sm:text-4xl">
-          Built for renters, owners, and the people running the platform.
-        </h1>
+      <section className="mx-auto max-w-5xl px-6 py-24">
+        <div className="relative">
+          <div className="relative z-10">
+            <span className="inline-flex items-center gap-2.5 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-500/25 via-amber-400/15 to-orange-500/20 px-5 py-2 text-xs sm:text-sm font-extrabold uppercase tracking-widest text-amber-200 backdrop-blur-xl shadow-[0_0_20px_rgba(245,158,11,0.25),inset_0_1px_1px_rgba(255,255,255,0.35)]">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400 shadow-[0_0_10px_#fbbf24]" />
+              </span>
+              <span className="drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">⚡ Key Features</span>
+            </span>
+            <h1 className="mt-4 font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.85)]">
+              Built for renters, owners, and the people{' '}
+              <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-200 bg-clip-text text-transparent">
+                running the platform.
+              </span>
+            </h1>
 
-        <div className="mt-8 flex flex-wrap gap-2">
-          {(Object.keys(ROLE_LABELS) as RoleKey[]).map((key) => (
-            <button
-              key={key}
-              onClick={() => setRole(key)}
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                role === key ? 'border-route bg-route/10 text-ink' : 'border-paper-line text-slate hover:border-ink/20'
-              }`}
-            >
-              {ROLE_LABELS[key]}
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {ROLE_FEATURES[role].map((f) => (
-            <div key={f.title} className="rounded-2xl border border-paper-line bg-paper-soft p-6">
-              <h3 className="font-display text-base font-semibold text-ink">{f.title}</h3>
-              <p className="mt-2 text-sm text-slate">{f.description}</p>
+            <div className="mt-8 flex flex-wrap gap-2.5">
+              {(Object.keys(ROLE_LABELS) as RoleKey[]).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setRole(key)}
+                  className={`rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-bold transition-all ${
+                    role === key
+                      ? 'border-amber-400 bg-amber-500/30 text-amber-200 shadow-md shadow-amber-500/25 scale-[1.02]'
+                      : 'border-white/20 bg-white/[0.10] text-white/90 hover:bg-white/[0.18] hover:text-white hover:border-white/40'
+                  }`}
+                >
+                  {ROLE_LABELS[key]}
+                </button>
+              ))}
             </div>
-          ))}
+
+            <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2">
+              {ROLE_FEATURES[role].map((f) => (
+                <div
+                  key={f.title}
+                  className="rounded-2xl border border-white/15 bg-gradient-to-b from-white/[0.08] via-black/[0.25] to-black/[0.45] p-6 backdrop-blur-xl shadow-[0_12px_28px_rgba(0,0,0,0.35),inset_0_1px_1px_rgba(255,255,255,0.15)] hover:border-amber-400/50 hover:scale-[1.01] transition-all"
+                >
+                  <div className="flex items-start gap-3.5">
+                    <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-amber-500/25 border border-amber-400/50 text-amber-300 text-xs font-bold mt-0.5 shadow-sm">
+                      ✓
+                    </span>
+                    <div>
+                      <h3 className="font-display text-base font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">{f.title}</h3>
+                      <p className="mt-1.5 text-sm text-white/80 leading-relaxed font-medium drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">{f.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     </MarketingLayout>

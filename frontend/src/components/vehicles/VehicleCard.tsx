@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { Badge } from '@/components/ui/Card';
 import type { VehicleSummary } from '@/services/vehicleApi';
 
 export function VehicleCard({
@@ -79,35 +78,27 @@ export function VehicleCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-70" />
 
         {/* Category */}
-        <div className="absolute left-4 top-4">
-          <div className="rounded-full border border-white/50 bg-white/85 px-3 py-1.5 shadow-md backdrop-blur-md">
-            <Badge tone="neutral">
+        <div className="absolute left-3.5 top-3.5">
+          <div className="rounded-full border border-white/40 bg-[#2d163d]/85 px-3 py-1 shadow-md backdrop-blur-md">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#ffc15a]">
               {vehicle.category || 'Vehicle'}
-            </Badge>
+            </span>
           </div>
         </div>
 
         {/* Rating */}
         {ratingCount > 0 && (
-          <div className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full border border-white/30 bg-black/45 px-3 py-1.5 text-xs font-bold text-white shadow-md backdrop-blur-md">
-            <span className="text-[#ffc15a]">
-              ★
-            </span>
-
-            <span>
-              {ratingAverage.toFixed(1)}
-            </span>
-
-            <span className="text-white/65">
-              ({ratingCount})
-            </span>
+          <div className="absolute right-3.5 top-3.5 flex items-center gap-1.5 rounded-full border border-white/30 bg-[#2d163d]/85 px-3 py-1 text-xs font-bold text-white shadow-md backdrop-blur-md">
+            <span className="text-[#ffc15a]">★</span>
+            <span>{ratingAverage.toFixed(1)}</span>
+            <span className="text-white/65">({ratingCount})</span>
           </div>
         )}
 
         {/* View button on hover */}
         <div className="absolute inset-x-0 bottom-4 flex justify-center translate-y-5 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-          <span className="rounded-xl bg-white px-5 py-2.5 text-xs font-bold text-[#6d367c] shadow-lg">
-            View vehicle →
+          <span className="rounded-2xl bg-gradient-to-r from-[#ea580c] via-[#f56a3d] to-[#ff9f2d] px-5 py-2.5 text-xs font-extrabold text-white shadow-xl shadow-orange-950/30">
+            View Vehicle Details →
           </span>
         </div>
       </div>
@@ -216,25 +207,25 @@ export function VehicleCard({
           </div>
         </div>
 
-        {/* Price */}
+        {/* Price & Action Button */}
         <div className="mt-5 flex items-end justify-between border-t border-[#8b4d9b]/10 pt-4">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate">
-              Starting from
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#7c3f8c]">
+              Rental Rate
             </p>
 
             <div className="mt-1 flex items-baseline gap-1">
-              <span className="font-display text-2xl font-extrabold text-[#241b2f]">
+              <span className="font-display text-2xl font-extrabold text-[#2d163d]">
                 ₹{pricePerDay.toLocaleString('en-IN')}
               </span>
 
-              <span className="text-xs font-medium text-slate">
+              <span className="text-xs font-semibold text-[#7c3f8c]">
                 / day
               </span>
             </div>
           </div>
 
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#6d367c] to-[#9b55a8] text-lg font-bold text-white shadow-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-[-8deg]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ea580c] via-[#f56a3d] to-[#7c3f8c] text-lg font-bold text-white shadow-md shadow-orange-950/20 transition-all duration-300 group-hover:scale-110 group-hover:rotate-[-8deg]">
             →
           </div>
         </div>

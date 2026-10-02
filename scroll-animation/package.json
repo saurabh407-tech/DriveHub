@@ -1,0 +1,9 @@
+{
+  "name": "scroll-animation",
+  "version": "1.0.0",
+  "description": "High-quality scroll-based frame animation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

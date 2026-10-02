@@ -10,11 +10,19 @@ import { User } from '../models/User.model';
 export const authenticate = async (req: Request, _res: Response, next: NextFunction) => {
   try {
     const header = req.headers.authorization;
-    if (!header || !header.startsWith('Bearer ')) {
+    let token: string | undefined;
+    if (header && header.startsWith('Bearer ')) {
+      token = header.split(' ')[1];
+    } else if (req.cookies?.accessToken) {
+      token = req.cookies.accessToken;
+    } else if (typeof req.query?.token === 'string') {
+      token = req.query.token;
+    }
+
+    if (!token) {
       throw ApiError.unauthorized('Authentication token missing');
     }
 
-    const token = header.split(' ')[1];
     const payload = verifyAccessToken(token);
 
     const user = await User.findById(payload.sub).select('_id role isActive isBanned');

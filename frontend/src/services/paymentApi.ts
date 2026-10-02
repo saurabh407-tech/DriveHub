@@ -11,6 +11,8 @@ export interface PaymentRecord {
   amount: number;
   currency: string;
   status: 'created' | 'authorized' | 'captured' | 'failed' | 'refunded' | 'partially_refunded';
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
   invoiceNumber?: string;
   invoiceUrl?: string;
   refunds: { amount: number; reason?: string; processedAt: string }[];
@@ -34,3 +36,11 @@ export async function getPaymentForBooking(bookingId: string) {
   const res = await api.get(`/payments/booking/${bookingId}`);
   return res.data as { success: boolean; data: { payment: PaymentRecord | null } };
 }
+
+export async function downloadInvoicePdf(bookingId: string, download = false): Promise<Blob> {
+  const res = await api.get(`/payments/booking/${bookingId}/invoice${download ? '?download=true' : ''}`, {
+    responseType: 'blob',
+  });
+  return res.data;
+}
+

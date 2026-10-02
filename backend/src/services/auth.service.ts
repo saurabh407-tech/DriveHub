@@ -58,7 +58,7 @@ export async function registerUser(input: RegisterInput): Promise<{ user: IUser;
   return { user, otpSentTo: user.email };
 }
 
-export async function verifyEmailOtp(email: string, otp: string): Promise<IUser> {
+export async function verifyEmailOtp(email: string, otp: string): Promise<{ user: IUser; tokens: AuthTokens }> {
   const user = await User.findOne({ email }).select('+otpHash +otpExpires +otpPurpose');
   if (!user) throw ApiError.notFound('No account found with this email');
   if (user.otpPurpose !== 'email_verification') throw ApiError.badRequest('No pending email verification for this account');
@@ -73,7 +73,8 @@ export async function verifyEmailOtp(email: string, otp: string): Promise<IUser>
   user.otpPurpose = undefined;
   await user.save();
 
-  return user;
+  const tokens = await issueTokens(user);
+  return { user, tokens };
 }
 
 export async function resendOtp(email: string, purpose: 'email_verification' | 'phone_verification'): Promise<void> {

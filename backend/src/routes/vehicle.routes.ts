@@ -53,7 +53,8 @@ router.post(
   vehicleController.uploadVehicleDocument
 );
 
-// ---- Admin: verification decisions ----
+// ---- Admin: verification decisions & quick email actions ----
+router.get('/:id/email-action', vehicleController.quickEmailAction);
 router.post('/:id/verify', authenticate, authorize('admin'), vehicleController.adminVerifyVehicle);
 router.post('/:id/reject', authenticate, authorize('admin'), vehicleController.adminRejectVehicle);
 

@@ -106,3 +106,144 @@
   display: inline-block;
   animation: marquee 14s linear infinite;
 }
+
+/* Premium Glassmorphic Luminous Shimmer Border Animation */
+@keyframes borderGlowSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.auth-border-glow {
+  position: absolute;
+  inset: -150%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 68deg,
+    rgba(255, 255, 255, 0.1) 78deg,
+    rgba(255, 176, 32, 0.85) 87deg,
+    #ffffff 90deg,
+    rgba(255, 176, 32, 0.85) 93deg,
+    rgba(255, 255, 255, 0.1) 102deg,
+    transparent 112deg,
+    transparent 360deg
+  );
+  animation: borderGlowSpin 7s linear infinite;
+  pointer-events: none;
+}
+
+.auth-border-glow-blur {
+  position: absolute;
+  inset: -150%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 65deg,
+    rgba(255, 176, 32, 0.45) 85deg,
+    rgba(255, 255, 255, 0.9) 90deg,
+    rgba(255, 176, 32, 0.45) 95deg,
+    transparent 115deg,
+    transparent 360deg
+  );
+  filter: blur(8px);
+  animation: borderGlowSpin 7s linear infinite;
+  pointer-events: none;
+}
+
+/* Subtle card edge glitter / shimmer for premium glass cards */
+@keyframes subtleEdgeGlitter {
+  0%, 100% {
+    opacity: 0.4;
+    background-position: 0% 50%;
+  }
+  50% {
+    opacity: 0.85;
+    background-position: 100% 50%;
+  }
+}
+
+.card-edge-glitter {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 176, 32, 0.04) 50%, rgba(255, 255, 255, 0.03) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-edge-glitter:hover {
+  border-color: rgba(255, 176, 32, 0.45);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.65), 0 0 20px -3px rgba(255, 176, 32, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.22);
+  transform: translateY(-2px);
+}
+
+/* Subtle continuous shimmering border for containers */
+.glitter-border-box {
+  position: relative;
+}
+
+.glitter-border-box::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.12), rgba(255, 176, 32, 0.4), rgba(255, 255, 255, 0.15), rgba(255, 176, 32, 0.4));
+  background-size: 300% 100%;
+  animation: subtleEdgeGlitter 8s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Semi-transparent section containers that showcase the 3D animation behind */
+.section-translucent-container {
+  background: linear-gradient(180deg, rgba(14, 20, 32, 0.35) 0%, rgba(8, 12, 20, 0.42) 50%, rgba(5, 8, 14, 0.48) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Automotive subtle card tone variations */
+.card-tone-amber {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 176, 32, 0.07) 50%, rgba(10, 15, 24, 0.4) 100%);
+  border: 1px solid rgba(255, 200, 100, 0.16);
+}
+.card-tone-amber:hover {
+  border-color: rgba(255, 176, 32, 0.5);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.6), 0 0 24px -4px rgba(255, 176, 32, 0.22);
+}
+
+.card-tone-gold {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(245, 190, 80, 0.06) 50%, rgba(10, 15, 24, 0.4) 100%);
+  border: 1px solid rgba(245, 200, 110, 0.16);
+}
+.card-tone-gold:hover {
+  border-color: rgba(245, 190, 80, 0.5);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.6), 0 0 24px -4px rgba(245, 190, 80, 0.22);
+}
+
+.card-tone-slate {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(180, 195, 215, 0.05) 50%, rgba(10, 15, 24, 0.4) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.card-tone-slate:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.6), 0 0 24px -4px rgba(255, 255, 255, 0.15);
+}
+
+.card-tone-copper {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(249, 115, 22, 0.06) 50%, rgba(10, 15, 24, 0.4) 100%);
+  border: 1px solid rgba(249, 115, 22, 0.16);
+}
+.card-tone-copper:hover {
+  border-color: rgba(249, 115, 22, 0.5);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.6), 0 0 24px -4px rgba(249, 115, 22, 0.22);
+}

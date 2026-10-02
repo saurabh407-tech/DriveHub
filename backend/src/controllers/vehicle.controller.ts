@@ -192,3 +192,106 @@ export const adminListPendingVehicles = asyncHandler(async (_req: Request, res: 
     .populate('owner', 'name email');
   res.status(200).json({ success: true, data: { vehicles } });
 });
+
+export const quickEmailAction = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { action, token } = req.query;
+
+  if (typeof action !== 'string' || typeof token !== 'string') {
+    return res.status(400).send('Invalid action parameters.');
+  }
+
+  const isValid = vehicleService.verifyVehicleActionToken(id, action, token);
+  if (!isValid) {
+    return res.status(403).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Invalid Link - DriveHub</title></head>
+        <body style="font-family: sans-serif; background: #faf8f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;">
+          <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); max-width: 480px; text-align: center; border: 1px solid #e7e3d8;">
+            <div style="font-size: 48px; margin-bottom: 12px;">⚠️</div>
+            <h1 style="color: #dc2626; font-size: 22px; margin-bottom: 8px;">Invalid or Expired Link</h1>
+            <p style="color: #5b6472; font-size: 14px;">This verification link could not be verified.</p>
+          </div>
+        </body>
+      </html>
+    `);
+  }
+
+  const vehicle = await Vehicle.findById(id);
+  if (!vehicle) {
+    return res.status(404).send('Vehicle not found.');
+  }
+
+  if (action === 'approve') {
+    vehicle.status = 'active';
+    if (vehicle.documents?.rc) vehicle.documents.rc.status = 'verified';
+    if (vehicle.documents?.insurance) vehicle.documents.insurance.status = 'verified';
+    await vehicle.save();
+
+    await createNotification({
+      userId: vehicle.owner.toString(),
+      type: 'document_verified',
+      title: 'Vehicle verified & published',
+      message: `${vehicle.title} passed verification and is now live on DriveHub.`,
+      link: `/owner/vehicles/${vehicle.id}`,
+    });
+
+    return res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Vehicle Approved - DriveHub</title></head>
+        <body style="font-family: 'Segoe UI', Tahoma, sans-serif; background: #faf8f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;">
+          <div style="background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); max-width: 480px; text-align: center; border: 1px solid #e7e3d8;">
+            <div style="font-size: 56px; margin-bottom: 12px;">✅</div>
+            <h1 style="color: #0b0f14; font-size: 24px; font-weight: 800; margin-bottom: 8px;">Vehicle Approved & Published!</h1>
+            <p style="color: #5b6472; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+              <strong>${vehicle.title}</strong> has been verified and is now <strong>LIVE</strong> for customer rentals on DriveHub.
+            </p>
+            <div>
+              <a href="http://localhost:5174/vehicles/${vehicle.id}" style="background: #16a34a; color: white; padding: 13px 26px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">
+                🚗 View Live Vehicle Page →
+              </a>
+            </div>
+          </div>
+        </body>
+      </html>
+    `);
+  }
+
+  if (action === 'reject') {
+    vehicle.status = 'rejected';
+    vehicle.rejectionReason = 'Listing rejected by Administrator via email dispatch.';
+    await vehicle.save();
+
+    await createNotification({
+      userId: vehicle.owner.toString(),
+      type: 'document_rejected',
+      title: 'Vehicle verification rejected',
+      message: `${vehicle.title} was rejected by Admin.`,
+      link: `/owner/vehicles/${vehicle.id}`,
+    });
+
+    return res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Vehicle Rejected - DriveHub</title></head>
+        <body style="font-family: 'Segoe UI', Tahoma, sans-serif; background: #faf8f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;">
+          <div style="background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); max-width: 480px; text-align: center; border: 1px solid #e7e3d8;">
+            <div style="font-size: 56px; margin-bottom: 12px;">❌</div>
+            <h1 style="color: #dc2626; font-size: 24px; font-weight: 800; margin-bottom: 8px;">Vehicle Listing Rejected</h1>
+            <p style="color: #5b6472; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+              <strong>${vehicle.title}</strong> has been marked as rejected. The vehicle owner has been notified.
+            </p>
+            <div>
+              <a href="http://localhost:5174/admin/vehicles" style="background: #0b0f14; color: white; padding: 13px 26px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">
+                📋 Go to Admin Verification Queue →
+              </a>
+            </div>
+          </div>
+        </body>
+      </html>
+    `);
+  }
+});
+

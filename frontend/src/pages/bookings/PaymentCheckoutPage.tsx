@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAppSelector } from '@/hooks/useAppRedux';
 import { getBooking } from '@/services/bookingApi';
@@ -12,6 +13,14 @@ export default function PaymentCheckoutPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const user = useAppSelector((s) => s.auth.user);
+
+  const mainDashboardPath = user
+    ? user.role === 'owner'
+      ? '/owner'
+      : user.role === 'admin'
+      ? '/admin'
+      : '/customer'
+    : '/';
 
   const [booking, setBooking] = useState<Booking | null>(null);
   const [order, setOrder] = useState<OrderResponse | null>(null);
@@ -42,7 +51,7 @@ export default function PaymentCheckoutPage() {
   }) => {
     try {
       await verifyPayment(payload);
-      navigate('/customer/bookings', { state: { justBooked: true } });
+      navigate(`/bookings/${id}`, { state: { justBooked: true } });
     } catch (err) {
       const anyErr = err as { response?: { data?: { message?: string } } };
       setError(anyErr?.response?.data?.message || 'Payment verification failed.');
@@ -77,7 +86,7 @@ export default function PaymentCheckoutPage() {
       order_id: order.payment.razorpayOrderId,
       name: 'DriveHub',
       description: `Booking ${booking?.bookingCode}`,
-      prefill: { name: user?.name, email: user?.email },
+      prefill: { name: user?.name, email: user?.email, contact: user?.phone },
       theme: { color: '#ffb020' },
       handler: (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
         finishWithVerification({
@@ -86,8 +95,21 @@ export default function PaymentCheckoutPage() {
           razorpaySignature: response.razorpay_signature,
         });
       },
-      modal: { ondismiss: () => setIsPaying(false) },
+      modal: {
+        ondismiss: () => {
+          setIsPaying(false);
+        },
+      },
     });
+
+    if (razorpay.on) {
+      razorpay.on('payment.failed', (response: any) => {
+        const desc = response?.error?.description || 'Payment was declined or failed. Please try again.';
+        setError(desc);
+        setIsPaying(false);
+      });
+    }
+
     razorpay.open();
   };
 
@@ -122,11 +144,25 @@ export default function PaymentCheckoutPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md px-6 py-16">
-      <Link to="/" className="font-display text-lg font-bold tracking-tight text-ink">
-        DriveHub
-      </Link>
-      <h1 className="mt-6 font-display text-2xl font-semibold text-ink">Complete your payment</h1>
+    <div className="mx-auto max-w-md px-6 py-12">
+      <div className="flex items-center justify-between border-b border-paper-line pb-4 mb-6">
+        <button
+          type="button"
+          onClick={() => navigate(mainDashboardPath)}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-paper-line bg-paper-soft px-3.5 py-1.5 text-xs font-semibold text-ink shadow-xs transition-all hover:bg-paper hover:border-amber-400 hover:text-amber-600 active:scale-95 cursor-pointer"
+        >
+          <ArrowLeft className="h-4 w-4 text-amber-500" />
+          <span>Back to Main Page</span>
+        </button>
+        <Link to={mainDashboardPath} className="flex items-center gap-2">
+          <img src="/drivehub-logo.png" alt="DriveHub" className="h-7 w-auto object-contain" />
+          <span className="font-display text-base font-bold tracking-tight text-ink">
+            Drive<span className="text-amber-500">Hub</span>
+          </span>
+        </Link>
+      </div>
+
+      <h1 className="font-display text-2xl font-semibold text-ink">Complete your payment</h1>
       <p className="mt-1 text-sm text-slate">{booking.bookingCode}</p>
 
       <div className="mt-6 rounded-2xl border border-paper-line bg-paper-soft p-5">

@@ -37,3 +37,17 @@ export const getPaymentForBooking = asyncHandler(async (req: Request, res: Respo
   const payment = await paymentService.getPaymentForBooking(req.params.bookingId, req.user!.id, req.user!.role);
   res.status(200).json({ success: true, data: { payment } });
 });
+
+export const downloadInvoice = asyncHandler(async (req: Request, res: Response) => {
+  const { filename, pdfBuffer } = await paymentService.getInvoicePdfForBooking(
+    req.params.bookingId,
+    req.user?.id,
+    req.user?.role
+  );
+  const disposition = req.query.download === 'true' ? 'attachment' : 'inline';
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `${disposition}; filename="${filename}"`);
+  res.setHeader('Content-Length', pdfBuffer.length);
+  res.status(200).end(pdfBuffer);
+});
+

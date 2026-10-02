@@ -33,7 +33,7 @@ export async function registerRequest(payload: {
 
 export async function verifyOtpRequest(payload: { email: string; otp: string }) {
   const res = await api.post('/auth/verify-otp', payload);
-  return res.data as { success: boolean; message: string; data: { user: AuthUser } };
+  return res.data as { success: boolean; message: string; data: { user: AuthUser; accessToken: string } };
 }
 
 export async function resendOtpRequest(email: string) {

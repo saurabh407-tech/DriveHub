@@ -20,8 +20,33 @@ const initialState: AuthState = {
 };
 
 function extractErrorMessage(err: unknown): string {
-  const anyErr = err as { response?: { data?: { message?: string } } };
-  return anyErr?.response?.data?.message || 'Something went wrong. Please try again.';
+  const anyErr = err as {
+    response?: {
+      data?: {
+        message?: string;
+        errors?: Record<string, string> | Array<{ msg?: string }>;
+      };
+    };
+    message?: string;
+  };
+
+  const responseData = anyErr?.response?.data;
+  if (responseData) {
+    if (responseData.errors && typeof responseData.errors === 'object') {
+      const firstVal = Object.values(responseData.errors)[0];
+      if (typeof firstVal === 'string') return firstVal;
+      if (typeof firstVal === 'object' && (firstVal as any)?.msg) return (firstVal as any).msg;
+    }
+    if (responseData.message) {
+      return responseData.message;
+    }
+  }
+
+  if (anyErr?.message) {
+    return anyErr.message;
+  }
+
+  return 'Something went wrong. Please try again.';
 }
 
 export const registerUser = createAsyncThunk(
@@ -39,7 +64,11 @@ export const verifyOtp = createAsyncThunk(
   'auth/verifyOtp',
   async (payload: { email: string; otp: string }, { rejectWithValue }) => {
     try {
-      return await authApi.verifyOtpRequest(payload);
+      const res = await authApi.verifyOtpRequest(payload);
+      if (res.data.accessToken) {
+        setAccessToken(res.data.accessToken);
+      }
+      return res;
     } catch (err) {
       return rejectWithValue(extractErrorMessage(err));
     }
@@ -100,10 +129,18 @@ const authSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      .addCase(verifyOtp.fulfilled, (state) => {
+      .addCase(verifyOtp.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(verifyOtp.fulfilled, (state, action) => {
+        state.status = 'authenticated';
+        state.user = action.payload.data.user;
+        state.bootstrapped = true;
         state.error = null;
       })
       .addCase(verifyOtp.rejected, (state, action: PayloadAction<unknown>) => {
+        state.status = 'error';
         state.error = action.payload as string;
       })
 

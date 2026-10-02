@@ -12,5 +12,6 @@ router.use(authenticate);
 router.post('/orders', authorize('customer'), createOrderValidator, validate, paymentController.createOrder);
 router.post('/verify', authorize('customer'), verifyPaymentValidator, validate, paymentController.verifyPayment);
 router.get('/booking/:bookingId', paymentController.getPaymentForBooking);
+router.get('/booking/:bookingId/invoice', paymentController.downloadInvoice);
 
 export default router;

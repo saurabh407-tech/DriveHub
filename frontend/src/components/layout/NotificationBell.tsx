@@ -79,7 +79,7 @@ export function NotificationBell() {
   };
 
   return (
-    <div className="relative" ref={panelRef}>
+    <div className="relative z-50" ref={panelRef}>
       <button
         onClick={onOpen}
         aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
@@ -110,7 +110,7 @@ export function NotificationBell() {
             transition={{ duration: 0.15, ease: 'easeOut' }}
             role="dialog"
             aria-label="Notifications"
-            className="absolute right-0 top-11 z-20 w-80 rounded-2xl border border-paper-line bg-paper-soft shadow-lg"
+            className="absolute right-0 top-12 z-50 w-80 sm:w-96 rounded-2xl border border-paper-line bg-white shadow-2xl"
           >
             <div className="flex items-center justify-between border-b border-paper-line px-4 py-3">
               <span className="text-sm font-semibold text-ink">Notifications</span>

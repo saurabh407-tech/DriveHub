@@ -5,6 +5,9 @@ import { Vehicle } from '../models/Vehicle.model';
 import { Coupon } from '../models/Coupon.model';
 import { ApiError } from '../utils/ApiError';
 import { createNotification } from './notification.service';
+import { User } from '../models/User.model';
+import { logger } from '../utils/logger';
+import { sendEmail, ADMIN_NOTIFICATION_EMAIL, bookingCreatedAdminEmailTemplate } from './email.service';
 import { calculateDurationDays, calculateBaseAmount, calculateBookingPrice, calculateCouponDiscount, MS_PER_DAY } from '../utils/pricing';
 import { calculateRefundAmount } from '../utils/refundPolicy';
 
@@ -60,10 +63,21 @@ async function applyCoupon(code: string | undefined, baseAmount: number, custome
 
 export async function createBooking(input: CreateBookingInput): Promise<IBooking> {
   if (input.endDate <= input.startDate) {
-    throw ApiError.badRequest('endDate must be after startDate');
+    throw ApiError.badRequest('Drop-off date must be after the pickup date');
   }
   if (input.startDate < new Date(Date.now() - MS_PER_DAY)) {
-    throw ApiError.badRequest('startDate cannot be in the past');
+    throw ApiError.badRequest('Pickup date cannot be in the past');
+  }
+
+  // 1-month advance booking limit rule:
+  const maxAdvanceDate = new Date();
+  maxAdvanceDate.setDate(maxAdvanceDate.getDate() + 30);
+  maxAdvanceDate.setHours(23, 59, 59, 999);
+
+  if (input.startDate > maxAdvanceDate) {
+    throw ApiError.badRequest(
+      'You are not allowed to book a vehicle more than 1 month in advance. Please select dates within the next 30 days.'
+    );
   }
 
   const vehicle = await Vehicle.findOne({ _id: input.vehicleId, isDeleted: { $ne: true } });
@@ -73,10 +87,54 @@ export async function createBooking(input: CreateBookingInput): Promise<IBooking
     throw ApiError.badRequest('You cannot book your own vehicle');
   }
 
-  const overlaps = vehicle.blockedDates.some(
+  // Check overlapping blocked dates
+  const overlappingBlocks = vehicle.blockedDates.filter(
     (block) => block.from <= input.endDate && block.to >= input.startDate
   );
-  if (overlaps) throw ApiError.conflict('This vehicle is not available for the selected dates');
+
+  if (overlappingBlocks.length > 0) {
+    // Check if overlapping blocks belong to truly active bookings
+    const bookingIds = overlappingBlocks
+      .map((b) => b.bookingId)
+      .filter(Boolean);
+
+    if (bookingIds.length > 0) {
+      const activeBookings = await Booking.find({
+        _id: { $in: bookingIds },
+        status: { $in: ['confirmed', 'ongoing', 'pending_payment'] },
+      });
+
+      // Filter out stale pending_payment bookings (>20 mins old)
+      const validActiveBookings = activeBookings.filter((b) => {
+        if (b.status === 'pending_payment') {
+          const ageMs = Date.now() - new Date(b.createdAt).getTime();
+          return ageMs < 20 * 60 * 1000;
+        }
+        return true;
+      });
+
+      const manualBlocks = overlappingBlocks.filter((b) => !b.bookingId);
+
+      if (validActiveBookings.length > 0 || manualBlocks.length > 0) {
+        throw ApiError.conflict('This vehicle is not available for the selected dates');
+      }
+
+      // Automatically clean up stale or cancelled blocked dates
+      const staleBookingIds = bookingIds.filter(
+        (id): id is NonNullable<typeof id> =>
+          Boolean(id) && !validActiveBookings.some((ab) => ab._id.toString() === id!.toString())
+      );
+      if (staleBookingIds.length > 0) {
+        await Vehicle.updateOne(
+          { _id: vehicle._id },
+          { $pull: { blockedDates: { bookingId: { $in: staleBookingIds } } } }
+        );
+      }
+    } else {
+      // Manual owner block
+      throw ApiError.conflict('This vehicle is not available for the selected dates');
+    }
+  }
 
   const days = calculateDurationDays(input.startDate, input.endDate);
   const baseAmount = calculateBaseAmount(
@@ -127,6 +185,23 @@ export async function createBooking(input: CreateBookingInput): Promise<IBooking
     await Coupon.updateOne({ code: couponCode }, { $inc: { usedCount: 1 } });
   }
 
+  // Notify admin about new booking
+  User.findById(input.customerId)
+    .select('name email')
+    .then((customer) => {
+      const html = bookingCreatedAdminEmailTemplate({
+        booking,
+        vehicle,
+        customer,
+      });
+      return sendEmail({
+        to: ADMIN_NOTIFICATION_EMAIL,
+        subject: `📅 [DriveHub Booking] New Booking Created: ${booking.bookingCode}`,
+        html,
+      });
+    })
+    .catch((err) => logger.error('Failed to send admin booking notification email', err));
+
   return booking;
 }
 
@@ -146,7 +221,9 @@ export async function getBookingById(bookingId: string, userId: string, role: st
     .populate('owner', 'name email phone');
   if (!booking) throw ApiError.notFound('Booking not found');
 
-  const isParticipant = booking.customer._id.toString() === userId || booking.owner._id.toString() === userId;
+  const customerId = (booking.customer as any)?._id?.toString() || booking.customer?.toString();
+  const ownerId = (booking.owner as any)?._id?.toString() || booking.owner?.toString();
+  const isParticipant = customerId === userId || ownerId === userId;
   if (!isParticipant && role !== 'admin') throw ApiError.forbidden('You do not have access to this booking');
 
   return booking;

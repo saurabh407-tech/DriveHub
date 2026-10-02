@@ -11,15 +11,22 @@ import { confirmBookingPayment } from './booking.service';
 import { generateInvoicePdf } from './invoice.service';
 import { uploadBuffer } from './upload.service';
 import { createNotification } from './notification.service';
+import { sendEmail, ADMIN_NOTIFICATION_EMAIL, paymentReceivedAdminEmailTemplate } from './email.service';
 
-const isRazorpayConfigured = !!(env.razorpay.keyId && env.razorpay.keySecret);
+let cachedClient: Razorpay | null = null;
+let cachedKeyId: string | null = null;
 
-const razorpay = isRazorpayConfigured
-  ? new Razorpay({ key_id: env.razorpay.keyId, key_secret: env.razorpay.keySecret })
-  : null;
-
-if (!isRazorpayConfigured) {
-  logger.warn('Razorpay not configured — payments will run in mock mode (auto-succeeds, no real charge)');
+export function getRazorpayClient(): { client: Razorpay | null; isConfigured: boolean } {
+  const isConfigured = !!(env.razorpay.keyId && env.razorpay.keySecret);
+  if (!isConfigured) return { client: null, isConfigured: false };
+  if (!cachedClient || cachedKeyId !== env.razorpay.keyId) {
+    cachedClient = new Razorpay({
+      key_id: env.razorpay.keyId,
+      key_secret: env.razorpay.keySecret,
+    });
+    cachedKeyId = env.razorpay.keyId;
+  }
+  return { client: cachedClient, isConfigured: true };
 }
 
 const MOCK_ORDER_PREFIX = 'order_mock_';
@@ -50,6 +57,7 @@ export async function createOrderForBooking(bookingId: string, customerId: strin
 
   const amountInPaise = Math.round(booking.pricing.totalAmount * 100);
 
+  const { client: razorpay, isConfigured: isRazorpayConfigured } = getRazorpayClient();
   let razorpayOrderId: string;
   if (isRazorpayConfigured && razorpay) {
     const order = await razorpay.orders.create({
@@ -140,6 +148,19 @@ export async function verifyAndCapturePayment(input: VerifyPaymentInput): Promis
       User.findById(payment.customer).select('name email'),
       Vehicle.findById(booking.vehicle).select('title'),
     ]);
+
+    // Notify admin about confirmed payment
+    sendEmail({
+      to: ADMIN_NOTIFICATION_EMAIL,
+      subject: `💰 [DriveHub Payment] Payment Confirmed: ₹${payment.amount} (Booking ${booking.bookingCode})`,
+      html: paymentReceivedAdminEmailTemplate({
+        payment,
+        booking,
+        vehicle,
+        customer,
+      }),
+    }).catch((err) => logger.error('Failed to send admin payment notification email', err));
+
     const invoiceNumber = `INV-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${crypto
       .randomBytes(3)
       .toString('hex')
@@ -175,6 +196,7 @@ export async function refundCapturedPaymentForBooking(
   const cappedRefund = Math.min(refundAmount, payment.amount - alreadyRefunded);
   if (cappedRefund <= 0) return;
 
+  const { client: razorpay, isConfigured: isRazorpayConfigured } = getRazorpayClient();
   let razorpayRefundId: string | undefined;
   if (isRazorpayConfigured && razorpay && payment.razorpayPaymentId && !payment.razorpayPaymentId.startsWith(MOCK_PAYMENT_PREFIX)) {
     const refund = await razorpay.payments.refund(payment.razorpayPaymentId, {
@@ -194,8 +216,70 @@ export async function refundCapturedPaymentForBooking(
 export async function getPaymentForBooking(bookingId: string, userId: string, role: string): Promise<IPayment | null> {
   const booking = await Booking.findById(bookingId);
   if (!booking) throw ApiError.notFound('Booking not found');
-  const isParticipant = booking.customer.toString() === userId || booking.owner.toString() === userId;
+  const isParticipant =
+    booking.customer?.toString() === userId ||
+    (booking.owner && booking.owner.toString() === userId);
   if (!isParticipant && role !== 'admin') throw ApiError.forbidden('You do not have access to this payment');
 
-  return Payment.findOne({ booking: bookingId }).sort({ createdAt: -1 });
+  const payment = await Payment.findOne({ booking: bookingId }).sort({ createdAt: -1 });
+  if (payment && payment.status === 'captured') {
+    // Ensure invoice URL points to our reliable backend PDF route
+    payment.invoiceUrl = `${env.serverUrl}/api/v1/payments/booking/${bookingId}/invoice`;
+  }
+  return payment;
 }
+
+export async function getInvoicePdfForBooking(
+  bookingId: string,
+  userId?: string,
+  role?: string
+): Promise<{ filename: string; pdfBuffer: Buffer }> {
+  const booking = await Booking.findById(bookingId);
+  if (!booking) throw ApiError.notFound('Booking not found');
+
+  if (userId && role !== 'admin') {
+    const isParticipant =
+      booking.customer?.toString() === userId ||
+      (booking.owner && booking.owner.toString() === userId);
+    if (!isParticipant) throw ApiError.forbidden('You do not have access to this invoice');
+  }
+
+  const payment = await Payment.findOne({
+    booking: booking._id,
+    status: { $in: ['captured', 'refunded', 'partially_refunded'] },
+  });
+  if (!payment) throw ApiError.notFound('No confirmed payment found for this booking');
+
+  const [customer, vehicle] = await Promise.all([
+    User.findById(payment.customer).select('name email'),
+    Vehicle.findById(booking.vehicle).select('title'),
+  ]);
+
+  const invoiceNumber =
+    payment.invoiceNumber ||
+    `INV-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${crypto
+      .randomBytes(3)
+      .toString('hex')
+      .toUpperCase()}`;
+
+  if (!payment.invoiceNumber) {
+    payment.invoiceNumber = invoiceNumber;
+    payment.invoiceUrl = `${env.serverUrl}/api/v1/payments/booking/${bookingId}/invoice`;
+    await payment.save();
+  }
+
+  const pdfBuffer = await generateInvoicePdf({
+    invoiceNumber,
+    booking,
+    payment,
+    customerName: customer?.name || 'Customer',
+    customerEmail: customer?.email || '',
+    vehicleTitle: vehicle?.title || 'Vehicle',
+  });
+
+  return {
+    filename: `DriveHub-Invoice-${booking.bookingCode}.pdf`,
+    pdfBuffer,
+  };
+}
+

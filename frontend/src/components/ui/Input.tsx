@@ -6,15 +6,16 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   hint?: string;
+  labelClassName?: string;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, hint, className, id, ...props }, ref) => {
+  ({ label, error, hint, className, labelClassName, id, ...props }, ref) => {
     const inputId = id || props.name;
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
-          <label htmlFor={inputId} className="text-sm font-medium text-ink">
+          <label htmlFor={inputId} className={clsx('text-sm font-medium text-ink', labelClassName)}>
             {label}
           </label>
         )}

@@ -38,26 +38,30 @@ export async function uploadBuffer(
   if (isCloudinaryConfigured) {
     return new Promise((resolve, reject) => {
       const extension = path.extname(originalName).toLowerCase();
+    const isPdf = extension === '.pdf';
+    const baseName = path.basename(originalName, extension);
+    const publicId = isPdf
+      ? `${baseName}-${crypto.randomBytes(4).toString('hex')}.pdf`
+      : `${baseName}-${crypto.randomBytes(4).toString('hex')}`;
 
-const stream = cloudinary.uploader.upload_stream(
-  {
-    folder: `drivehub/${folder}`,
-    resource_type: extension === '.pdf' ? 'raw' : 'image',
-    use_filename: true,
-    unique_filename: true,
-    overwrite: false,
-  },
-  (err, result) => {
-    if (err || !result) {
-      return reject(err || new Error('Cloudinary upload failed'));
-    }
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: `drivehub/${folder}`,
+        resource_type: isPdf ? 'raw' : 'image',
+        public_id: publicId,
+        format: isPdf ? 'pdf' : undefined,
+      },
+      (err, result) => {
+        if (err || !result) {
+          return reject(err || new Error('Cloudinary upload failed'));
+        }
 
-    resolve({
-      url: result.secure_url,
-      publicId: result.public_id,
-    });
-  }
-);
+        resolve({
+          url: result.secure_url,
+          publicId: result.public_id,
+        });
+      }
+    );
       stream.end(buffer);
     });
   }

@@ -2,7 +2,8 @@
 
 
 import type { ReactNode } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation, Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import clsx from 'clsx';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppRedux';
 import { logoutUser } from '@/redux/slices/authSlice';
@@ -178,10 +179,13 @@ export function DashboardLayout({
 }) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const user = useAppSelector((s) => s.auth.user);
 
   const role = (user?.role || 'customer') as UserRole;
+  const rootDashboardPath = '/' + role;
+  const isRootDashboard = location.pathname === rootDashboardPath;
 
   const items = NAV_BY_ROLE[role];
 
@@ -201,40 +205,29 @@ export function DashboardLayout({
       <aside className="flex w-[280px] flex-shrink-0 flex-col border-r border-white/40 bg-gradient-to-b from-[#2d163d] via-[#4b235e] to-[#21132d] px-4 py-5 shadow-2xl">
 
         {/* DriveHub Logo */}
-
-        <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl">
-
+        <Link
+          to={rootDashboardPath}
+          className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl transition-transform hover:scale-[1.02] block cursor-pointer"
+          title="Return to Main Dashboard"
+        >
           <div className="flex items-center gap-3">
-
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ffc45d] via-[#ff9f2d] to-[#f56a3d] shadow-lg shadow-orange-950/30">
-
               <img
                 src="/drivehub-logo.png"
                 alt="DriveHub Logo"
                 className="h-9 w-9 object-contain"
               />
-
             </div>
-
             <div>
-
               <h1 className="font-display text-xl font-extrabold tracking-wide text-white">
-
                 Drive<span className="text-[#ffc15a]">Hub</span>
-
               </h1>
-
               <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-purple-200">
-
                 Smart Vehicle Rental
-
               </p>
-
             </div>
-
           </div>
-
-        </div>
+        </Link>
 
 
         {/* Role Badge */}
@@ -399,33 +392,36 @@ export function DashboardLayout({
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
 
         {/* Top Header */}
+        <header className="relative z-40 flex h-[72px] flex-shrink-0 items-center justify-between border-b border-[#ded4e2] bg-white/80 px-6 sm:px-8 backdrop-blur-xl">
+          <div className="flex items-center gap-3 sm:gap-4">
+            {!isRootDashboard ? (
+              <button
+                type="button"
+                onClick={() => navigate(rootDashboardPath)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-purple-200/80 bg-white/80 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-[#32193f] shadow-xs transition-all hover:bg-white hover:border-amber-400 hover:text-amber-600 active:scale-95 cursor-pointer"
+                title="Return to Main Dashboard Overview"
+              >
+                <ArrowLeft className="h-4 w-4 text-amber-500" />
+                <span>Back to Main Page</span>
+              </button>
+            ) : null}
 
-        <header className="flex h-[72px] flex-shrink-0 items-center justify-between border-b border-[#ded4e2] bg-white/70 px-8 backdrop-blur-xl">
-
-    
-
-          <div className="flex flex-col items-center justify-start">
-  <img
-    src="/drivehub-logo.png"
-    alt="DriveHub Logo"
-    className="h-45 w-45 object-contain"
-  />
-
-</div>
-
-
-          <div className="flex items-center gap-4">
-
-            <div className="hidden rounded-full border border-purple-100 bg-purple-50 px-4 py-2 text-xs font-semibold text-[#6e3d7c] sm:block">
-
-              ✨ Have a great journey
-
-            </div>
-
-            <NotificationBell />
-
+            {role === 'customer' && (
+              <Link
+                to="/vehicles"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300/80 bg-gradient-to-r from-amber-400/20 to-orange-400/20 px-3.5 py-1.5 text-xs sm:text-sm font-bold text-amber-900 shadow-xs transition-all hover:from-amber-400/30 hover:to-orange-400/30 hover:border-amber-400 active:scale-95"
+              >
+                <span>🚗 Browse Vehicles</span>
+              </Link>
+            )}
           </div>
 
+          <div className="flex items-center gap-4">
+            <div className="hidden rounded-full border border-purple-100 bg-purple-50 px-4 py-2 text-xs font-semibold text-[#6e3d7c] sm:block">
+              ✨ Have a great journey
+            </div>
+            <NotificationBell />
+          </div>
         </header>
 
 

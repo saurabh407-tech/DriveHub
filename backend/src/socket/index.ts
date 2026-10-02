@@ -15,8 +15,29 @@ interface AckResponse {
 }
 
 export function initSocket(httpServer: HttpServer): Server {
+  const allowedOrigins = [
+    env.clientUrl,
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'http://localhost:8080',
+    'http://localhost:3000',
+  ];
+
   io = new Server(httpServer, {
-    cors: { origin: env.clientUrl, credentials: true },
+    cors: {
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (
+          allowedOrigins.includes(origin) ||
+          (!env.isProd && /^http:\/\/localhost:\d+$/.test(origin))
+        ) {
+          return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'));
+      },
+      credentials: true,
+    },
   });
 
   // Every socket connection must present the same JWT access token used
