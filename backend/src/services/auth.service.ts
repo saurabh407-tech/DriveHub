@@ -4,6 +4,7 @@ import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/
 import { generateOtp, generateUrlToken, hashValue, compareHash } from '../utils/tokens';
 import { sendEmail, otpEmailTemplate, passwordResetEmailTemplate } from './email.service';
 import { env } from '../config/env';
+import { logger } from '../utils/logger';
 
 const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const RESET_TTL_MS = 30 * 60 * 1000; // 30 minutes
@@ -49,10 +50,13 @@ export async function registerUser(input: RegisterInput): Promise<{ user: IUser;
 
   await user.save();
 
-  await sendEmail({
+  // Dispatch email immediately without blocking user response
+  sendEmail({
     to: user.email,
     subject: 'Verify your DriveHub account',
     html: otpEmailTemplate(user.name, otp, 'email verification'),
+  }).catch((err) => {
+    logger.error(`Failed to send registration OTP to ${user.email}:`, err);
   });
 
   return { user, otpSentTo: user.email };
@@ -90,10 +94,13 @@ export async function resendOtp(email: string, purpose: 'email_verification' | '
   user.otpPurpose = purpose;
   await user.save();
 
-  await sendEmail({
+  // Dispatch email immediately without blocking user response
+  sendEmail({
     to: user.email,
     subject: 'Your DriveHub verification code',
     html: otpEmailTemplate(user.name, otp, purpose),
+  }).catch((err) => {
+    logger.error(`Failed to send resend OTP to ${user.email}:`, err);
   });
 }
 
@@ -154,10 +161,13 @@ export async function requestPasswordReset(email: string): Promise<void> {
 
   const resetUrl = `${env.clientUrl}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
 
-  await sendEmail({
+  // Dispatch email immediately without blocking response
+  sendEmail({
     to: user.email,
     subject: 'Reset your DriveHub password',
     html: passwordResetEmailTemplate(user.name, resetUrl),
+  }).catch((err) => {
+    logger.error(`Failed to send password reset email to ${user.email}:`, err);
   });
 }
 

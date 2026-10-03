@@ -9,12 +9,39 @@ function getTransporter(): Transporter | null {
     return null; // not configured — caller falls back to console logging
   }
   if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: env.smtp.host,
-      port: env.smtp.port,
-      secure: env.smtp.port === 465,
-      auth: { user: env.smtp.user, pass: env.smtp.pass },
-    });
+    const isGmail = env.smtp.host.includes('gmail') || env.smtp.user.endsWith('@gmail.com');
+    const cleanPassword = env.smtp.pass.replace(/\s+/g, '');
+
+    if (isGmail) {
+      transporter = nodemailer.createTransport({
+        service: 'gmail',
+        pool: true,
+        maxConnections: 5,
+        maxMessages: 100,
+        auth: {
+          user: env.smtp.user,
+          pass: cleanPassword,
+        },
+        connectionTimeout: 8000,
+        greetingTimeout: 5000,
+        socketTimeout: 12000,
+      });
+    } else {
+      transporter = nodemailer.createTransport({
+        host: env.smtp.host,
+        port: env.smtp.port,
+        secure: env.smtp.port === 465,
+        pool: true,
+        maxConnections: 5,
+        auth: {
+          user: env.smtp.user,
+          pass: cleanPassword,
+        },
+        connectionTimeout: 8000,
+        greetingTimeout: 5000,
+        socketTimeout: 12000,
+      });
+    }
   }
   return transporter;
 }
@@ -38,16 +65,23 @@ export async function sendEmail({ to, subject, html, replyTo }: SendEmailInput):
     logger.info(`[DEV EMAIL] Subject: ${subject}\n${html}`);
     return;
   }
+
+  // Ensure RFC 5322 compliant friendly display name for Gmail
+  const fromAddress = env.smtp.from && env.smtp.from.includes('<')
+    ? env.smtp.from
+    : `"DriveHub" <${env.smtp.user}>`;
+
   try {
     await t.sendMail({
-      from: env.smtp.from,
+      from: fromAddress,
       to,
       subject,
       html,
       ...(replyTo ? { replyTo } : {}),
     });
+    logger.info(`Email successfully dispatched to ${to} (${subject})`);
   } catch (err) {
-    logger.error(`SMTP delivery failed for ${to}. Logging fallback:`, err);
+    logger.error(`SMTP delivery failed for ${to}:`, err);
     logger.info(`[DEV EMAIL FALLBACK] Subject: ${subject}\n${html}`);
   }
 }
