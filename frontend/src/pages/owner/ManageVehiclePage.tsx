@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Card';
+import { Clock, CheckCircle2, AlertTriangle } from 'lucide-react';
 import {
   getVehicle,
   uploadVehicleImages,
@@ -111,14 +112,122 @@ export default function ManageVehiclePage() {
         </Badge>
       </div>
 
+      {/* Prominent Floating Banner on Action */}
       {banner && (
-        <p
-          className={`mt-6 rounded-lg px-3 py-2 text-sm ${
-            banner.tone === 'success' ? 'bg-signal/10 text-signal-dim' : 'bg-alert/10 text-alert'
+        <div
+          className={`mt-6 overflow-hidden rounded-2xl border-2 p-5 shadow-xl transition-all ${
+            banner.tone === 'success'
+              ? 'border-emerald-500/50 bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent text-ink shadow-emerald-500/10'
+              : 'border-alert/50 bg-gradient-to-r from-alert/20 via-alert/10 to-transparent text-ink shadow-alert/10'
           }`}
         >
-          {banner.text}
-        </p>
+          <div className="flex items-center gap-3.5">
+            <div
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-md ${
+                banner.tone === 'success' ? 'bg-emerald-500 text-white' : 'bg-alert text-white'
+              }`}
+            >
+              {banner.tone === 'success' ? <CheckCircle2 className="h-6 w-6" /> : <AlertTriangle className="h-6 w-6" />}
+            </div>
+            <div>
+              <h4 className="text-base font-bold text-ink">
+                {banner.tone === 'success' ? '✓ Submitted for Verification!' : 'Submission Notice'}
+              </h4>
+              <p className="mt-0.5 text-sm text-slate font-medium">
+                {banner.text}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Persistent Highlighted Status Cards */}
+      {vehicle.status === 'pending_verification' && (
+        <div className="mt-6 overflow-hidden rounded-2xl border-2 border-amber-500/60 bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-amber-500/5 p-5 sm:p-6 shadow-xl shadow-amber-500/15">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-black shadow-lg shadow-amber-500/30">
+                <Clock className="h-6 w-6 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="font-display text-lg font-bold text-ink">
+                    Submitted for Admin Verification
+                  </h3>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/25 px-3 py-0.5 text-xs font-bold text-amber-800 dark:text-amber-300 border border-amber-500/40">
+                    <span className="h-2 w-2 animate-ping rounded-full bg-amber-500" />
+                    Under Review
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-slate leading-relaxed">
+                  Your vehicle listing, RC, and insurance documents are currently under review by the DriveHub admin team. Review typically takes <strong>24–48 hours</strong>. You will receive an email once approved.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Stepper Timeline */}
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-amber-500/20 pt-4 text-xs font-semibold">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white text-[11px] font-bold">✓</span>
+              <span>1. Vehicle & Docs Uploaded</span>
+            </div>
+            <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300 font-bold">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-black text-[11px] font-bold">2</span>
+              <span>2. Admin Verification (Current)</span>
+            </div>
+            <div className="flex items-center gap-2 text-slate opacity-60">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate/20 text-slate text-[11px]">3</span>
+              <span>3. Live for Customer Bookings</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {vehicle.status === 'active' && (
+        <div className="mt-6 overflow-hidden rounded-2xl border-2 border-emerald-500/50 bg-gradient-to-br from-emerald-500/15 via-emerald-500/10 to-transparent p-5 sm:p-6 shadow-xl shadow-emerald-500/10">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-md shadow-emerald-500/30">
+              <CheckCircle2 className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-display text-lg font-bold text-ink">
+                  Vehicle Verified & Published Live! 🚗
+                </h3>
+                <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-500/40">
+                  Active
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-slate">
+                Your vehicle has passed verification and is now active for customer bookings across all search results.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {vehicle.status === 'rejected' && (
+        <div className="mt-6 overflow-hidden rounded-2xl border-2 border-rose-500/50 bg-gradient-to-br from-rose-500/15 via-rose-500/10 to-transparent p-5 sm:p-6 shadow-xl shadow-rose-500/10">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-500 text-white shadow-md shadow-rose-500/30">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-display text-lg font-bold text-ink">
+                  Verification Not Approved
+                </h3>
+                <span className="rounded-full bg-rose-500/20 px-2.5 py-0.5 text-xs font-bold text-rose-700 dark:text-rose-300 border border-rose-500/40">
+                  Needs Revision
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-slate">
+                {vehicle.rejectionReason || 'The admin requested updates to your documents or vehicle details. Please review and re-submit.'}
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Photos */}
@@ -188,13 +297,34 @@ export default function ManageVehiclePage() {
       </section>
 
       {vehicle.status === 'draft' && (
-        <div className="mt-10">
-          <Button onClick={onSubmitVerification} disabled={!readyToSubmit} isLoading={isSubmitting}>
-            Submit for verification
-          </Button>
+        <div className="mt-10 rounded-2xl border border-paper-line bg-paper-soft p-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-display text-base font-bold text-ink">Ready to get your vehicle on the road?</h3>
+              <p className="mt-1 text-xs text-slate">
+                Add at least one photo, your RC document, and Insurance certificate to submit for admin review.
+              </p>
+            </div>
+            <Button onClick={onSubmitVerification} disabled={!readyToSubmit} isLoading={isSubmitting} size="lg">
+              Submit for Verification →
+            </Button>
+          </div>
           {!readyToSubmit && (
-            <p className="mt-2 text-xs text-slate">Add at least one photo and both documents to continue.</p>
+            <p className="mt-3 text-xs font-medium text-amber-600 dark:text-amber-400">
+              ⚠️ Incomplete requirements: Ensure you have uploaded at least 1 photo and both documents above.
+            </p>
           )}
+        </div>
+      )}
+
+      {vehicle.status === 'pending_verification' && (
+        <div className="mt-10 rounded-2xl border-2 border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-6 text-center">
+          <p className="text-base font-bold text-amber-700 dark:text-amber-300">
+            ⏳ Verification In Progress
+          </p>
+          <p className="mt-1 text-xs text-slate">
+            The DriveHub administration desk has been notified. No further action is required from you at this time.
+          </p>
         </div>
       )}
     </DashboardLayout>

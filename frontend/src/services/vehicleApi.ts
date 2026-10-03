@@ -20,6 +20,7 @@ export interface VehicleSummary {
     rc: { status: string };
     insurance: { status: string };
   };
+  rejectionReason?: string;
 }
 
 export interface SearchFilters {
