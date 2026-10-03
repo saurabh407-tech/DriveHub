@@ -86,17 +86,55 @@ async function sendViaResend({ to, subject, html, replyTo }: SendEmailInput): Pr
   }
 }
 
+async function sendViaBrevo({ to, subject, html, replyTo }: SendEmailInput): Promise<boolean> {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) return false;
+
+  try {
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': apiKey,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: { name: 'DriveHub', email: env.smtp.user || 'sourabhshukla8318@gmail.com' },
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+        ...(replyTo ? { replyTo: { email: replyTo } } : {}),
+      }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      logger.info(`Brevo API: email successfully dispatched to ${to} (${subject})`);
+      return true;
+    } else {
+      logger.error('Brevo API returned error:', data);
+      return false;
+    }
+  } catch (err) {
+    logger.error('Brevo API call failed:', err);
+    return false;
+  }
+}
+
 /**
- * Sends an email via Resend HTTPS API or SMTP if configured. In local dev without SMTP
+ * Sends an email via Brevo / Resend HTTPS API or SMTP if configured. In local dev without SMTP
  * credentials, it logs the email to the console instead of failing,
  * so the auth flow is fully testable without a mail provider.
  */
 export async function sendEmail({ to, subject, html, replyTo }: SendEmailInput): Promise<void> {
-  // 1. Try Resend HTTPS API first (Bypasses Render free tier SMTP blocks)
+  // 1. Try Brevo HTTPS API (Port 443 — Bypasses Render free tier SMTP blocks)
+  const sentViaBrevo = await sendViaBrevo({ to, subject, html, replyTo });
+  if (sentViaBrevo) return;
+
+  // 2. Try Resend HTTPS API (Port 443)
   const sentViaResend = await sendViaResend({ to, subject, html, replyTo });
   if (sentViaResend) return;
 
-  // 2. Fall back to SMTP
+  // 3. Fall back to SMTP
   const t = getTransporter();
   if (!t) {
     logger.warn(`SMTP not configured — logging email instead of sending to ${to}`);
