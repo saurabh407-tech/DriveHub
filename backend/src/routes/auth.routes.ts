@@ -38,7 +38,7 @@ router.get('/me', authenticate, authController.getMe);
 
 // Diagnostic route to check email provider status on Render
 router.get('/test-email', async (req, res) => {
-  const to = (req.query.to as string) || 'saurabhshukla8314@gmail.com';
+  const to = (req.query.to as string) || 'sourabhshukla8318@gmail.com';
   const brevoKey = (process.env.BREVO_API_KEY || '').trim();
   const resendKey = (process.env.RESEND_API_KEY || '').trim();
 
@@ -48,6 +48,7 @@ router.get('/test-email', async (req, res) => {
     hasBrevoKey: Boolean(brevoKey),
     brevoKeyPrefix: brevoKey ? brevoKey.slice(0, 10) + '...' : null,
     hasResendKey: Boolean(resendKey),
+    resendKeyPrefix: resendKey ? resendKey.slice(0, 6) + '...' : null,
     senderEmail,
     to,
   };
@@ -64,7 +65,7 @@ router.get('/test-email', async (req, res) => {
         body: JSON.stringify({
           sender: { name: 'DriveHub', email: senderEmail },
           to: [{ email: to }],
-          subject: 'DriveHub Diagnostic Email',
+          subject: 'DriveHub Diagnostic Email (Brevo)',
           htmlContent: '<p>Testing Brevo email delivery from DriveHub</p>',
         }),
       });
@@ -73,6 +74,29 @@ router.get('/test-email', async (req, res) => {
       report.brevoResponse = data;
     } catch (e: unknown) {
       report.brevoError = (e as Error).message;
+    }
+  }
+
+  if (resendKey) {
+    try {
+      const resendRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: process.env.RESEND_FROM || 'DriveHub <onboarding@resend.dev>',
+          to: [to],
+          subject: 'DriveHub Diagnostic Email (Resend)',
+          html: '<p>Testing Resend email delivery from DriveHub</p>',
+        }),
+      });
+      const data = await resendRes.json();
+      report.resendStatus = resendRes.status;
+      report.resendResponse = data;
+    } catch (e: unknown) {
+      report.resendError = (e as Error).message;
     }
   }
 
