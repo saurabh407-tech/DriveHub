@@ -12,7 +12,16 @@ export interface VehicleSummary {
   seats: number;
   images: { url: string; publicId: string; isPrimary: boolean }[];
   pricing: { perDay: number; securityDeposit: number; currency: string };
-  location: { city: string; state: string };
+  location: {
+    address?: string;
+    city: string;
+    state: string;
+    pincode?: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+  };
   status: string;
   ratingAverage: number;
   ratingCount: number;

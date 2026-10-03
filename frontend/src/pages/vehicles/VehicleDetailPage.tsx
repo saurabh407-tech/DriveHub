@@ -15,6 +15,77 @@ function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function checkCityAvailability(
+  enteredAddress: string,
+  vehicleCity: string
+): { isAvailable: boolean; message?: string } {
+  if (!enteredAddress || !enteredAddress.trim()) {
+    return { isAvailable: false, message: 'Please enter a pickup address.' };
+  }
+
+  const vCity = (vehicleCity || '').trim().toLowerCase();
+  if (!vCity) return { isAvailable: true };
+
+  const text = enteredAddress.trim().toLowerCase();
+
+  const synonyms: Record<string, string[]> = {
+    prayagraj: ['prayagraj', 'allahabad'],
+    allahabad: ['prayagraj', 'allahabad'],
+    varanasi: ['varanasi', 'banaras', 'kashi'],
+    bengaluru: ['bengaluru', 'bangalore'],
+    bangalore: ['bengaluru', 'bangalore'],
+    mumbai: ['mumbai', 'bombay'],
+    bombay: ['mumbai', 'bombay'],
+    kolkata: ['kolkata', 'calcutta'],
+    calcutta: ['kolkata', 'calcutta'],
+    chennai: ['chennai', 'madras'],
+    madras: ['chennai', 'madras'],
+    delhi: ['delhi', 'new delhi', 'ncr'],
+    'new delhi': ['delhi', 'new delhi', 'ncr'],
+    gurugram: ['gurugram', 'gurgaon'],
+    gurgaon: ['gurugram', 'gurgaon'],
+    pune: ['pune', 'poona'],
+    ayodhya: ['ayodhya', 'faizabad'],
+  };
+
+  const allowedCities = [vCity, ...(synonyms[vCity] || [])];
+
+  const containsAllowedCity = allowedCities.some((c) => {
+    const regex = new RegExp(`(^|[\\s,.-])${c}([\\s,.-]|$)`, 'i');
+    return regex.test(text) || text.includes(c);
+  });
+
+  const ALL_MAJOR_CITIES = [
+    'lucknow', 'kanpur', 'delhi', 'new delhi', 'noida', 'gurugram', 'gurgaon', 'ghaziabad',
+    'faridabad', 'agra', 'varanasi', 'banaras', 'kashi', 'prayagraj', 'allahabad', 'mumbai',
+    'bombay', 'pune', 'bangalore', 'bengaluru', 'hyderabad', 'chennai', 'madras', 'kolkata',
+    'calcutta', 'jaipur', 'ahmedabad', 'surat', 'indore', 'bhopal', 'patna', 'chandigarh',
+    'dehradun', 'gorakhpur', 'meerut', 'bareilly', 'aligarh', 'moradabad', 'jhansi', 'ayodhya',
+    'faizabad', 'gwalior', 'jabalpur', 'raipur', 'ranchi', 'jodhpur', 'kota', 'nagpur',
+    'nashik', 'aurangabad', 'amritsar', 'ludhiana', 'jalandhar', 'vadodara', 'rajkot', 'mysore',
+    'coimbatore', 'madurai', 'kochi', 'thiruvananthapuram', 'visakhapatnam', 'shimla', 'haridwar'
+  ];
+
+  const otherCityFound = ALL_MAJOR_CITIES.find((other) => {
+    if (allowedCities.includes(other)) return false;
+    const regex = new RegExp(`(^|[\\s,.-])${other}([\\s,.-]|$)`, 'i');
+    return regex.test(text) || text.includes(other);
+  });
+
+  if (otherCityFound) {
+    return {
+      isAvailable: false,
+      message: `Not available in this location. This vehicle is only available in ${vehicleCity}.`,
+    };
+  }
+
+  if (containsAllowedCity) {
+    return { isAvailable: true };
+  }
+
+  return { isAvailable: true };
+}
+
 export default function VehicleDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -67,9 +138,43 @@ export default function VehicleDetailPage() {
   useEffect(() => {
     if (!id) return;
     getVehicle(id)
-      .then((res) => setVehicle(res.data.vehicle))
+      .then((res) => {
+        const v = res.data.vehicle;
+        setVehicle(v);
+        const ownerFullAddress = [v.location?.address, v.location?.city, v.location?.state]
+          .filter(Boolean)
+          .join(', ') || v.location?.city || '';
+        const initialLoc: LocationValue = {
+          address: ownerFullAddress,
+          lat: v.location?.coordinates?.latitude,
+          lng: v.location?.coordinates?.longitude,
+        };
+        setPickup(initialLoc);
+        setDrop(initialLoc);
+      })
       .catch(() => setError('This vehicle could not be found.'));
   }, [id]);
+
+  const ownerPickupAddress = useMemo(() => {
+    if (!vehicle?.location) return '';
+    return [vehicle.location.address, vehicle.location.city, vehicle.location.state]
+      .filter(Boolean)
+      .join(', ') || vehicle.location.city || '';
+  }, [vehicle]);
+
+  const cityAvailability = useMemo(() => {
+    if (!vehicle?.location?.city) return { isAvailable: true };
+    return checkCityAvailability(pickup.address, vehicle.location.city);
+  }, [vehicle, pickup.address]);
+
+  const useOwnerPickup = () => {
+    if (!vehicle?.location) return;
+    setPickup({
+      address: ownerPickupAddress,
+      lat: vehicle.location.coordinates?.latitude,
+      lng: vehicle.location.coordinates?.longitude,
+    });
+  };
 
   const days = useMemo(() => {
     const start = new Date(startDate);
@@ -114,6 +219,13 @@ export default function VehicleDetailPage() {
     }
     if (!pickup.address.trim() || !drop.address.trim()) {
       setBookingError('Enter both a pickup and drop-off address.');
+      return;
+    }
+    if (!cityAvailability.isAvailable) {
+      setBookingError(
+        cityAvailability.message ||
+        `Not available in this location. This vehicle is only available for pickup in ${vehicle.location.city}.`
+      );
       return;
     }
     if (new Date(endDate) <= new Date(startDate)) {
@@ -269,12 +381,56 @@ export default function VehicleDetailPage() {
             </div>
 
             <div className="mt-3">
+              <div className="mb-1 flex items-center justify-between text-xs">
+                <span className="font-semibold text-slate">
+                  📍 Vehicle Base City: <strong className="text-ink">{vehicle.location.city}</strong>
+                </span>
+                {ownerPickupAddress && pickup.address !== ownerPickupAddress && (
+                  <button
+                    type="button"
+                    onClick={useOwnerPickup}
+                    className="font-bold text-[#ea580c] hover:underline cursor-pointer"
+                  >
+                    Reset to Owner's Address
+                  </button>
+                )}
+              </div>
               <LocationPicker
                 label="Pickup address"
                 placeholder="Where should we bring the vehicle?"
                 value={pickup}
                 onChange={setPickup}
               />
+              {/* City Availability Indicator */}
+              {pickup.address.trim() && (
+                <div className="mt-2">
+                  {cityAvailability.isAvailable ? (
+                    <div className="flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/25 px-3 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-white text-[10px]">✓</span>
+                      <span>Available in {vehicle.location.city}</span>
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-3 text-xs text-rose-700 dark:text-rose-300">
+                      <div className="flex items-center gap-1.5 font-bold">
+                        <span>❌</span>
+                        <span>Not available in this location</span>
+                      </div>
+                      <p className="mt-1 text-[11px] text-rose-600/90 dark:text-rose-400">
+                        This vehicle is only available for pickup in <strong>{vehicle.location.city}</strong>. Please enter an address within {vehicle.location.city}.
+                      </p>
+                      {ownerPickupAddress && (
+                        <button
+                          type="button"
+                          onClick={useOwnerPickup}
+                          className="mt-2 inline-flex items-center gap-1 font-bold text-[11px] text-rose-800 dark:text-rose-200 underline cursor-pointer"
+                        >
+                          📍 Use Owner's pickup address ({ownerPickupAddress})
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <div className="mt-3">
               <LocationPicker
@@ -304,10 +460,20 @@ export default function VehicleDetailPage() {
             <button
               type="button"
               onClick={onBook}
-              disabled={isBooking}
-              className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#ea580c] via-[#f56a3d] to-[#ff9f2d] py-3.5 px-6 text-sm sm:text-base font-extrabold text-white shadow-lg shadow-orange-950/20 hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={isBooking || !cityAvailability.isAvailable}
+              className={`mt-5 w-full rounded-2xl py-3.5 px-6 text-sm sm:text-base font-extrabold text-white shadow-lg transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
+                !cityAvailability.isAvailable
+                  ? 'bg-slate-400 shadow-none'
+                  : 'bg-gradient-to-r from-[#ea580c] via-[#f56a3d] to-[#ff9f2d] shadow-orange-950/20 hover:scale-[1.01] active:scale-[0.99]'
+              }`}
             >
-              {isBooking ? 'Processing Booking...' : user ? 'Book this vehicle' : 'Log in to book'}
+              {isBooking
+                ? 'Processing Booking...'
+                : !cityAvailability.isAvailable
+                ? `Not available in this location (Vehicle is in ${vehicle.location.city})`
+                : user
+                ? 'Book this vehicle'
+                : 'Log in to book'}
             </button>
           </div>
         </div>
