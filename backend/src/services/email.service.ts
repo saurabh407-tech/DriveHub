@@ -87,37 +87,54 @@ async function sendViaResend({ to, subject, html, replyTo }: SendEmailInput): Pr
 }
 
 async function sendViaBrevo({ to, subject, html, replyTo }: SendEmailInput): Promise<boolean> {
-  const apiKey = process.env.BREVO_API_KEY;
+  const apiKey = (process.env.BREVO_API_KEY || '').trim();
   if (!apiKey) return false;
 
-  try {
-    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'api-key': apiKey,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        sender: { name: 'DriveHub', email: env.smtp.user || 'sourabhshukla8318@gmail.com' },
-        to: [{ email: to }],
-        subject,
-        htmlContent: html,
-        ...(replyTo ? { replyTo: { email: replyTo } } : {}),
-      }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      logger.info(`Brevo API: email successfully dispatched to ${to} (${subject})`);
-      return true;
-    } else {
-      logger.error('Brevo API returned error:', data);
-      return false;
+  const senderCandidates = [
+    process.env.BREVO_SENDER_EMAIL?.trim(),
+    env.smtp.user?.trim(),
+    'sourabhshukla8318@gmail.com',
+    'saurabhshukla8314@gmail.com',
+  ].filter(Boolean) as string[];
+
+  const uniqueSenders = [...new Set(senderCandidates)];
+
+  for (const senderEmail of uniqueSenders) {
+    try {
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: 'DriveHub', email: senderEmail },
+          to: [{ email: to }],
+          subject,
+          htmlContent: html,
+          ...(replyTo ? { replyTo: { email: replyTo } } : {}),
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        logger.info(`Brevo API: email successfully dispatched to ${to} (${subject}) using sender ${senderEmail}`);
+        return true;
+      } else {
+        logger.warn(`Brevo API attempt with sender ${senderEmail} returned:`, data);
+        const msg = JSON.stringify(data).toLowerCase();
+        if (!msg.includes('sender') && !msg.includes('authenticate') && !msg.includes('authorized')) {
+          break;
+        }
+      }
+    } catch (err) {
+      logger.error('Brevo API network error:', err);
+      break;
     }
-  } catch (err) {
-    logger.error('Brevo API call failed:', err);
-    return false;
   }
+
+  return false;
 }
 
 /**

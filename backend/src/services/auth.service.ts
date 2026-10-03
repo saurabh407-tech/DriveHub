@@ -30,7 +30,7 @@ async function issueTokens(user: IUser): Promise<AuthTokens> {
   return { accessToken, refreshToken };
 }
 
-export async function registerUser(input: RegisterInput): Promise<{ user: IUser; otpSentTo: string; previewOtp: string }> {
+export async function registerUser(input: RegisterInput): Promise<{ user: IUser; otpSentTo: string }> {
   const existing = await User.findOne({ email: input.email });
   if (existing) throw ApiError.conflict('An account with this email already exists');
 
@@ -50,16 +50,14 @@ export async function registerUser(input: RegisterInput): Promise<{ user: IUser;
 
   await user.save();
 
-  // Dispatch email immediately without blocking user response
-  sendEmail({
+  // Await email dispatch with fallback
+  await sendEmail({
     to: user.email,
     subject: 'Verify your DriveHub account',
     html: otpEmailTemplate(user.name, otp, 'email verification'),
-  }).catch((err) => {
-    logger.error(`Failed to send registration OTP to ${user.email}:`, err);
   });
 
-  return { user, otpSentTo: user.email, previewOtp: otp };
+  return { user, otpSentTo: user.email };
 }
 
 export async function verifyEmailOtp(email: string, otp: string): Promise<{ user: IUser; tokens: AuthTokens }> {
@@ -81,7 +79,7 @@ export async function verifyEmailOtp(email: string, otp: string): Promise<{ user
   return { user, tokens };
 }
 
-export async function resendOtp(email: string, purpose: 'email_verification' | 'phone_verification'): Promise<{ previewOtp: string }> {
+export async function resendOtp(email: string, purpose: 'email_verification' | 'phone_verification'): Promise<void> {
   const user = await User.findOne({ email });
   if (!user) throw ApiError.notFound('No account found with this email');
   if (purpose === 'email_verification' && user.isEmailVerified) {
@@ -94,16 +92,12 @@ export async function resendOtp(email: string, purpose: 'email_verification' | '
   user.otpPurpose = purpose;
   await user.save();
 
-  // Dispatch email immediately without blocking user response
-  sendEmail({
+  // Await email dispatch
+  await sendEmail({
     to: user.email,
     subject: 'Your DriveHub verification code',
     html: otpEmailTemplate(user.name, otp, purpose),
-  }).catch((err) => {
-    logger.error(`Failed to send resend OTP to ${user.email}:`, err);
   });
-
-  return { previewOtp: otp };
 }
 
 export async function loginUser(
