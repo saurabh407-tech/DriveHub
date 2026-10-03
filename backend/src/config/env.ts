@@ -16,7 +16,11 @@ export const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   isProd: process.env.NODE_ENV === 'production',
   port: parseInt(process.env.PORT || '5000', 10),
-  clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
+  clientUrl:
+    process.env.CLIENT_URL ||
+    (process.env.NODE_ENV === 'production'
+      ? 'https://drivehub.vercel.app'
+      : 'http://localhost:5173'),
 
   mongoUri: required('MONGO_URI'),
 
@@ -53,7 +57,12 @@ export const env = {
     keySecret: process.env.RAZORPAY_KEY_SECRET || '',
   },
 
-  serverUrl: process.env.SERVER_URL || `http://localhost:${process.env.PORT || '5000'}`,
+  serverUrl:
+    process.env.SERVER_URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    (process.env.NODE_ENV === 'production'
+      ? 'https://drivehub-ml9f.onrender.com'
+      : `http://localhost:${process.env.PORT || '5000'}`),
 
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10),

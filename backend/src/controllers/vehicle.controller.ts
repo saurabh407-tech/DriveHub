@@ -5,6 +5,7 @@ import * as vehicleService from '../services/vehicle.service';
 import { uploadBuffer, deleteAsset } from '../services/upload.service';
 import { Vehicle } from '../models/Vehicle.model';
 import { createNotification } from '../services/notification.service';
+import { env } from '../config/env';
 
 export const createVehicle = asyncHandler(async (req: Request, res: Response) => {
   const vehicle = await vehicleService.createVehicle({ ownerId: req.user!.id, body: req.body });
@@ -249,7 +250,7 @@ export const quickEmailAction = asyncHandler(async (req: Request, res: Response)
               <strong>${vehicle.title}</strong> has been verified and is now <strong>LIVE</strong> for customer rentals on DriveHub.
             </p>
             <div>
-              <a href="http://localhost:5174/vehicles/${vehicle.id}" style="background: #16a34a; color: white; padding: 13px 26px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">
+              <a href="${env.clientUrl}/vehicles/${vehicle.id}" style="background: #16a34a; color: white; padding: 13px 26px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">
                 🚗 View Live Vehicle Page →
               </a>
             </div>
@@ -284,7 +285,7 @@ export const quickEmailAction = asyncHandler(async (req: Request, res: Response)
               <strong>${vehicle.title}</strong> has been marked as rejected. The vehicle owner has been notified.
             </p>
             <div>
-              <a href="http://localhost:5174/admin/vehicles" style="background: #0b0f14; color: white; padding: 13px 26px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">
+              <a href="${env.clientUrl}/admin/vehicles" style="background: #0b0f14; color: white; padding: 13px 26px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">
                 📋 Go to Admin Verification Queue →
               </a>
             </div>
