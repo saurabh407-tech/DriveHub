@@ -32,9 +32,11 @@ function checkCityAvailability(
     prayagraj: ['prayagraj', 'allahabad'],
     allahabad: ['prayagraj', 'allahabad'],
     varanasi: ['varanasi', 'banaras', 'kashi'],
+    banaras: ['varanasi', 'banaras', 'kashi'],
+    kashi: ['varanasi', 'banaras', 'kashi'],
     bengaluru: ['bengaluru', 'bangalore'],
     bangalore: ['bengaluru', 'bangalore'],
-    mumbai: ['mumbai', 'bombay'],
+    mumbai: ['mumbai', 'bombay', 'navi mumbai', 'thane'],
     bombay: ['mumbai', 'bombay'],
     kolkata: ['kolkata', 'calcutta'],
     calcutta: ['kolkata', 'calcutta'],
@@ -46,15 +48,25 @@ function checkCityAvailability(
     gurgaon: ['gurugram', 'gurgaon'],
     pune: ['pune', 'poona'],
     ayodhya: ['ayodhya', 'faizabad'],
+    faizabad: ['ayodhya', 'faizabad'],
   };
 
   const allowedCities = [vCity, ...(synonyms[vCity] || [])];
 
-  const containsAllowedCity = allowedCities.some((c) => {
-    const regex = new RegExp(`(^|[\\s,.-])${c}([\\s,.-]|$)`, 'i');
-    return regex.test(text) || text.includes(c);
-  });
+  // Helper: check whole-word phrase match with boundary
+  const matchesWord = (target: string, input: string) => {
+    const escaped = target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, 'i');
+    return regex.test(input);
+  };
 
+  // 1. If the address contains the vehicle's city or any of its valid synonyms (e.g. Prayagraj / Allahabad), it is AVAILABLE!
+  const containsAllowedCity = allowedCities.some((c) => matchesWord(c, text));
+  if (containsAllowedCity) {
+    return { isAvailable: true };
+  }
+
+  // 2. Check if a conflicting different major city is present
   const ALL_MAJOR_CITIES = [
     'lucknow', 'kanpur', 'delhi', 'new delhi', 'noida', 'gurugram', 'gurgaon', 'ghaziabad',
     'faridabad', 'agra', 'varanasi', 'banaras', 'kashi', 'prayagraj', 'allahabad', 'mumbai',
@@ -68,19 +80,14 @@ function checkCityAvailability(
 
   const otherCityFound = ALL_MAJOR_CITIES.find((other) => {
     if (allowedCities.includes(other)) return false;
-    const regex = new RegExp(`(^|[\\s,.-])${other}([\\s,.-]|$)`, 'i');
-    return regex.test(text) || text.includes(other);
+    return matchesWord(other, text);
   });
 
   if (otherCityFound) {
     return {
       isAvailable: false,
-      message: `Not available in this location. This vehicle is only available in ${vehicleCity}.`,
+      message: `Not available in this location. This vehicle is only available for pickup in ${vehicleCity}.`,
     };
-  }
-
-  if (containsAllowedCity) {
-    return { isAvailable: true };
   }
 
   return { isAvailable: true };
