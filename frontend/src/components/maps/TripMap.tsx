@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Navigation, MapPin } from 'lucide-react';
 import { loadLeaflet } from '@/utils/loadLeaflet';
 
 interface Point {
@@ -46,9 +47,9 @@ export function TripMap({ points }: { points: Point[] }) {
     markersRef.current = points.map((p) => {
       const icon = L.divIcon({
         className: '',
-        html: `<div style="width:14px;height:14px;border-radius:9999px;background:${p.color};border:2px solid #0b0f14;"></div>`,
-        iconSize: [14, 14],
-        iconAnchor: [7, 7],
+        html: `<div style="width:16px;height:16px;border-radius:9999px;background:${p.color};border:2.5px solid #ffffff;box-shadow:0 2px 6px rgba(0,0,0,0.35);"></div>`,
+        iconSize: [16, 16],
+        iconAnchor: [8, 8],
       });
       return L.marker([p.lat, p.lng], { icon, title: p.label }).addTo(map);
     });
@@ -70,15 +71,52 @@ export function TripMap({ points }: { points: Point[] }) {
 
   if (points.length === 0) {
     return (
-      <div className="flex h-48 w-full flex-col items-center justify-center rounded-lg border border-dashed border-paper-line text-center text-xs text-slate">
-        No location pins for this trip yet.
+      <div className="relative flex h-52 w-full flex-col items-center justify-center overflow-hidden rounded-xl border border-slate-200/90 bg-gradient-to-b from-slate-50 via-slate-100/60 to-slate-50 p-6 text-center shadow-inner">
+        {/* Decorative subtle GPS grid background */}
+        <div
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}
+        />
+
+        {/* Pulse radar rings */}
+        <div className="relative mb-3 flex items-center justify-center">
+          <span className="absolute h-14 w-14 rounded-full bg-teal-500/10 animate-ping opacity-75" />
+          <div className="relative h-12 w-12 rounded-2xl bg-white border border-teal-200/80 shadow-sm flex items-center justify-center text-teal-600">
+            <Navigation className="h-6 w-6 transform rotate-45" />
+          </div>
+        </div>
+
+        <p className="font-display text-sm font-bold text-slate-800">
+          Route & GPS Navigation Standby
+        </p>
+        <p className="mt-1 text-xs text-slate-500 max-w-sm leading-relaxed">
+          Interactive map markers and live coordinates will sync automatically once vehicle handover and GPS tracking are activated.
+        </p>
+
+        <div className="mt-3.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-white text-slate-700 border border-slate-200 shadow-2xs">
+          <MapPin className="h-3 w-3 text-amber-500" />
+          <span>Pickup & Drop addresses confirmed above</span>
+        </div>
       </div>
     );
   }
 
   if (!mapReady) {
-    return <div className="h-48 w-full animate-pulse rounded-lg bg-ink/5" />;
+    return (
+      <div className="h-52 w-full animate-pulse rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-xs text-slate-400">
+        Loading interactive map...
+      </div>
+    );
   }
 
-  return <div ref={mapDivRef} className="h-48 w-full rounded-lg border border-paper-line" />;
+  return (
+    <div
+      ref={mapDivRef}
+      className="h-56 w-full rounded-xl border border-slate-200 shadow-inner overflow-hidden"
+    />
+  );
 }

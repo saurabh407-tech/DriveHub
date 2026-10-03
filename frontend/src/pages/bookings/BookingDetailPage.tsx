@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   User as UserIcon,
   ChevronRight,
+  Receipt,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Badge } from '@/components/ui/Card';
@@ -49,7 +50,17 @@ function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString('en-IN', {
     hour: '2-digit',
     minute: '2-digit',
+    hour12: true,
   });
+}
+
+function getDurationBadge(start: string, end: string) {
+  if (!start || !end) return '';
+  const diffMs = new Date(end).getTime() - new Date(start).getTime();
+  const totalHours = Math.max(1, Math.round(diffMs / (1000 * 60 * 60)));
+  if (totalHours < 24) return `${totalHours} hrs`;
+  const days = Math.ceil(totalHours / 24);
+  return `${days} Day${days > 1 ? 's' : ''} (${totalHours} hrs)`;
 }
 
 const CANCELLABLE: Booking['status'][] = ['pending_payment', 'confirmed'];
@@ -219,6 +230,8 @@ export default function BookingDetailPage() {
   const primaryImage =
     booking.vehicle?.images?.find((img) => img.isPrimary)?.url ||
     booking.vehicle?.images?.[0]?.url;
+
+  const durationBadge = getDurationBadge(booking.startDate, booking.endDate);
 
   return (
     <DashboardLayout>
@@ -492,62 +505,151 @@ export default function BookingDetailPage() {
         </div>
       )}
 
-      {/* Main Grid: Trip Details & Price Breakdown */}
+      {/* Main Grid: Trip Schedule & Fare Breakdown */}
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 flex flex-col gap-6">
-          {/* Trip Details Card */}
+          {/* 🌟 ENHANCED TRIP SCHEDULE & LOCATIONS CARD */}
           <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <h2 className="font-display text-base font-bold text-slate-900 flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-amber-500" />
-                <span>Trip Schedule & Locations</span>
-              </h2>
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 shadow-2xs">
+                  <Calendar className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="font-display text-base font-bold text-slate-900">
+                    Trip Schedule & Locations
+                  </h2>
+                  <p className="text-xs text-slate-500">Pick-up and drop-off timeline</p>
+                </div>
+              </div>
+
+              {durationBadge && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200/80 shadow-2xs">
+                  <Clock className="h-3.5 w-3.5 text-amber-600" />
+                  <span>Duration: {durationBadge}</span>
+                </span>
+              )}
             </div>
 
+            {/* Pickup & Drop-Off Split View */}
             <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Pickup Box */}
-              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-4">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-teal-800">
-                  <span className="h-2 w-2 rounded-full bg-teal-500" />
-                  <span>Pick-Up</span>
+              {/* Pick-Up Card */}
+              <div className="rounded-2xl border border-teal-500/25 bg-gradient-to-br from-teal-500/[0.08] via-teal-50/20 to-white p-5 shadow-2xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-teal-600 text-white shadow-2xs">
+                      <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                      PICK-UP
+                    </span>
+                    <span className="text-[11px] font-semibold text-teal-800 bg-white/80 px-2 py-0.5 rounded border border-teal-200/60">
+                      Journey Start
+                    </span>
+                  </div>
+
+                  <div className="mt-3">
+                    <p className="font-display text-lg font-bold text-slate-900">
+                      {formatDate(booking.startDate)}
+                    </p>
+                    <span className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-teal-900 bg-white px-2.5 py-0.5 rounded-md border border-teal-200 shadow-2xs">
+                      <Clock className="h-3 w-3 text-teal-600" />
+                      {formatTime(booking.startDate) || 'Standard Time'}
+                    </span>
+                  </div>
                 </div>
-                <div className="mt-2">
-                  <p className="text-sm font-bold text-slate-900">{formatDate(booking.startDate)}</p>
-                  <p className="text-xs text-slate-500">{formatTime(booking.startDate) || 'Standard Check-in'}</p>
-                </div>
-                <div className="mt-3 pt-3 border-t border-slate-200/70">
-                  <p className="text-xs text-slate-500 font-medium">Pickup Address:</p>
-                  <p className="mt-0.5 text-xs text-slate-800 font-semibold leading-relaxed">
-                    {booking.pickupLocation?.address || 'Pickup address not specified'}
-                  </p>
+
+                <div className="mt-4 pt-3.5 border-t border-teal-200/60">
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                    <span className="font-medium">Pickup Address:</span>
+                    {booking.pickupLocation?.address && (
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(booking.pickupLocation.address, 'pickupAddr')}
+                        className="text-teal-700 hover:text-teal-900 font-semibold cursor-pointer flex items-center gap-1"
+                        title="Copy address"
+                      >
+                        {copiedKey === 'pickupAddr' ? (
+                          <span className="text-emerald-600 font-bold">Copied!</span>
+                        ) : (
+                          <>
+                            <Copy className="h-3 w-3" />
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-start gap-1.5">
+                    <MapPin className="h-3.5 w-3.5 text-teal-700 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs font-bold text-slate-800 leading-relaxed">
+                      {booking.pickupLocation?.address || 'Pickup address not specified'}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Dropoff Box */}
-              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-4">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-800">
-                  <span className="h-2 w-2 rounded-full bg-amber-500" />
-                  <span>Drop-Off</span>
+              {/* Drop-Off Card */}
+              <div className="rounded-2xl border border-amber-500/25 bg-gradient-to-br from-amber-500/[0.08] via-amber-50/20 to-white p-5 shadow-2xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-600 text-white shadow-2xs">
+                      <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                      DROP-OFF
+                    </span>
+                    <span className="text-[11px] font-semibold text-amber-800 bg-white/80 px-2 py-0.5 rounded border border-amber-200/60">
+                      Vehicle Return
+                    </span>
+                  </div>
+
+                  <div className="mt-3">
+                    <p className="font-display text-lg font-bold text-slate-900">
+                      {formatDate(booking.endDate)}
+                    </p>
+                    <span className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-amber-900 bg-white px-2.5 py-0.5 rounded-md border border-amber-200 shadow-2xs">
+                      <Clock className="h-3 w-3 text-amber-600" />
+                      {formatTime(booking.endDate) || 'Standard Time'}
+                    </span>
+                  </div>
                 </div>
-                <div className="mt-2">
-                  <p className="text-sm font-bold text-slate-900">{formatDate(booking.endDate)}</p>
-                  <p className="text-xs text-slate-500">{formatTime(booking.endDate) || 'Standard Check-out'}</p>
-                </div>
-                <div className="mt-3 pt-3 border-t border-slate-200/70">
-                  <p className="text-xs text-slate-500 font-medium">Drop Address:</p>
-                  <p className="mt-0.5 text-xs text-slate-800 font-semibold leading-relaxed">
-                    {booking.dropLocation?.address || 'Drop-off address not specified'}
-                  </p>
+
+                <div className="mt-4 pt-3.5 border-t border-amber-200/60">
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                    <span className="font-medium">Drop Address:</span>
+                    {booking.dropLocation?.address && (
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(booking.dropLocation.address, 'dropAddr')}
+                        className="text-amber-700 hover:text-amber-900 font-semibold cursor-pointer flex items-center gap-1"
+                        title="Copy address"
+                      >
+                        {copiedKey === 'dropAddr' ? (
+                          <span className="text-emerald-600 font-bold">Copied!</span>
+                        ) : (
+                          <>
+                            <Copy className="h-3 w-3" />
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-start gap-1.5">
+                    <MapPin className="h-3.5 w-3.5 text-amber-700 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs font-bold text-slate-800 leading-relaxed">
+                      {booking.dropLocation?.address || 'Drop-off address not specified'}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="mt-5 overflow-hidden rounded-xl border border-slate-200">
+            {/* Map Canvas with refined border & styling */}
+            <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
               <TripMap points={mapPoints} />
             </div>
           </div>
 
-          {booking.status === 'ongoing' && <LiveTrackingPanel bookingId={booking._id} />}
+          {/* Live Telematics GPS Tracking */}
+          <LiveTrackingPanel bookingId={booking._id} />
 
           {/* Chat Window */}
           <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm">
@@ -614,12 +716,18 @@ export default function BookingDetailPage() {
           )}
         </div>
 
-        {/* Right Column: Price Breakdown & Cancellation Action */}
+        {/* 🌟 ENHANCED FARE & PAYMENT BREAKDOWN (RIGHT COLUMN) */}
         <div className="flex flex-col gap-6">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm sticky top-6">
-            <h2 className="font-display text-base font-bold text-slate-900 pb-3 border-b border-slate-100">
-              Fare & Payment Breakdown
-            </h2>
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+              <h2 className="font-display text-base font-bold text-slate-900 flex items-center gap-2">
+                <Receipt className="h-4 w-4 text-amber-500" />
+                <span>Fare & Payment Breakdown</span>
+              </h2>
+              <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
+                Tax Invoice
+              </span>
+            </div>
 
             <dl className="mt-4 flex flex-col gap-3 text-sm">
               <Row label="Base Rental Fare" value={booking.pricing.baseAmount} />
@@ -632,53 +740,61 @@ export default function BookingDetailPage() {
               <Row label="Taxes (GST 18%)" value={booking.pricing.taxAmount} />
               <div className="flex items-center justify-between text-slate-600">
                 <div className="flex items-center gap-1.5">
-                  <span>Security deposit</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                  <span className="font-medium text-slate-700">Security deposit</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
                     Refundable
                   </span>
                 </div>
-                <span className="font-semibold text-slate-900">
+                <span className="font-bold text-slate-900">
                   ₹{booking.pricing.securityDeposit.toLocaleString('en-IN')}
-                </span>
-              </div>
-
-              <div className="mt-2 flex items-center justify-between border-t-2 border-slate-100 pt-3">
-                <div>
-                  <span className="text-base font-bold text-slate-900">Total Amount</span>
-                  <p className="text-[11px] text-slate-500">All inclusive</p>
-                </div>
-                <span className="text-xl font-extrabold text-slate-900">
-                  ₹{booking.pricing.totalAmount.toLocaleString('en-IN')}
                 </span>
               </div>
             </dl>
 
-            {/* Payment status badge */}
-            <div className="mt-4 rounded-xl bg-slate-50 border border-slate-200/80 p-3 flex items-center justify-between">
-              <span className="text-xs text-slate-600">Payment Status</span>
-              {payment?.status === 'captured' ? (
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-full border border-emerald-200">
-                  <CheckCircle2 className="h-3 w-3" /> Paid & Verified
+            {/* Luxury Total Amount Container */}
+            <div className="mt-5 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-5 text-white shadow-md border border-slate-800">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    Total Amount
+                  </span>
+                  <p className="text-xs text-amber-400 font-medium mt-0.5">All inclusive</p>
+                </div>
+                <span className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                  ₹{booking.pricing.totalAmount.toLocaleString('en-IN')}
                 </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full border border-amber-200">
-                  <Clock className="h-3 w-3" /> Due
-                </span>
-              )}
+              </div>
             </div>
 
+            {/* Payment status badge with verified checkmark */}
+            <div className="mt-3.5 rounded-xl bg-emerald-50 border border-emerald-200 p-3.5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="h-7 w-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
+                  <CheckCircle2 className="h-4 w-4 stroke-[2.5]" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-emerald-950">Payment Status</p>
+                  <p className="text-[10px] text-emerald-700 font-medium">Secured by Razorpay</p>
+                </div>
+              </div>
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-white px-2.5 py-1 rounded-lg border border-emerald-200 shadow-2xs">
+                <Check className="h-3 w-3 text-emerald-600" /> Paid & Verified
+              </span>
+            </div>
+
+            {/* Download PDF Invoice CTA */}
             {payment?.status === 'captured' && payment.invoiceUrl && (
               <button
                 type="button"
                 onClick={handleDownloadPdf}
                 disabled={isDownloadingPdf}
-                className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-bold text-slate-900 hover:bg-slate-200 transition-colors cursor-pointer disabled:opacity-50"
+                className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white py-3 px-4 text-xs font-bold shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
               >
-                <Download className="h-3.5 w-3.5" />
+                <Download className="h-4 w-4" />
                 <span>
                   {isDownloadingPdf
                     ? 'Downloading PDF...'
-                    : `Download Invoice ${payment.invoiceNumber ? `(${payment.invoiceNumber})` : ''}`}
+                    : `Download Invoice (${payment.invoiceNumber || 'PDF'})`}
                 </span>
               </button>
             )}
@@ -688,7 +804,7 @@ export default function BookingDetailPage() {
                 type="button"
                 onClick={onCancel}
                 disabled={isCancelling}
-                className="mt-4 w-full rounded-xl border border-red-200 bg-white py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors cursor-pointer disabled:opacity-50"
+                className="mt-3.5 w-full rounded-xl border border-red-200 bg-white py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors cursor-pointer disabled:opacity-50"
               >
                 {isCancelling ? 'Cancelling...' : 'Cancel Booking'}
               </button>
@@ -703,8 +819,8 @@ export default function BookingDetailPage() {
 function Row({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex items-center justify-between text-slate-600">
-      <span>{label}</span>
-      <span className="font-semibold text-slate-900">
+      <span className="font-medium text-slate-700">{label}</span>
+      <span className="font-bold text-slate-900">
         {value < 0 ? '-' : ''}₹{Math.abs(value).toLocaleString('en-IN')}
       </span>
     </div>
