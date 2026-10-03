@@ -40,27 +40,27 @@ export function MarketingFooter() {
 
       <div className="mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-8 pt-12 pb-8">
         {/* 1. TOP ROW: TRUST & VALUE HIGHLIGHTS BANNER */}
-        <div className="grid grid-cols-2 gap-4 pb-10 sm:grid-cols-4 border-b border-white/10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pb-8 sm:gap-4 sm:pb-10 border-b border-white/10">
           {TRUST_BADGES.map((b) => (
             <div
               key={b.title}
-              className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] p-3.5 backdrop-blur-md transition-all duration-200"
+              className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] p-3 sm:p-3.5 backdrop-blur-md transition-all duration-200"
             >
               <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-500/15 border border-amber-400/30 text-lg shadow-sm">
                 {b.icon}
               </span>
-              <div>
-                <h4 className="font-display text-xs sm:text-sm font-bold text-white tracking-tight drop-shadow-sm">{b.title}</h4>
-                <p className="text-[11px] text-white/70 mt-0.5">{b.desc}</p>
+              <div className="min-w-0">
+                <h4 className="font-display text-xs sm:text-sm font-bold text-white tracking-tight drop-shadow-sm truncate">{b.title}</h4>
+                <p className="text-[11px] text-white/70 mt-0.5 truncate">{b.desc}</p>
               </div>
             </div>
           ))}
         </div>
 
         {/* 2. MAIN FOOTER NAVIGATION GRID */}
-        <div className="mt-12 grid grid-cols-2 gap-10 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="mt-10 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 sm:gap-10">
           {/* Brand Info Column */}
-          <div className="col-span-2 sm:col-span-3 lg:col-span-2">
+          <div className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2">
             <Link to="/" className="inline-flex items-center gap-3 group">
               <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-black font-black text-lg shadow-[0_0_20px_rgba(251,191,36,0.35)] group-hover:scale-105 transition-transform">
                 DH

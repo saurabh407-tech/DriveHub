@@ -135,35 +135,35 @@ export default function CustomerDashboard() {
         <div className="space-y-7">
 
           {/* Welcome Hero Section */}
-          <section className="relative overflow-hidden rounded-3xl border border-white/70 bg-gradient-to-r from-[#5b2c6f] via-[#7c3f8c] to-[#a85db4] p-7 shadow-xl sm:p-9">
+          <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/70 bg-gradient-to-r from-[#5b2c6f] via-[#7c3f8c] to-[#a85db4] p-5 sm:p-7 lg:p-9 shadow-xl">
 
             {/* Decorative circles */}
-            <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-white/10" />
-            <div className="absolute -bottom-20 right-32 h-48 w-48 rounded-full bg-white/10" />
-            <div className="absolute left-1/2 top-0 h-full w-1/3 -skew-x-12 bg-white/5" />
+            <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-white/10 pointer-events-none" />
+            <div className="absolute -bottom-20 right-32 h-48 w-48 rounded-full bg-white/10 pointer-events-none" />
+            <div className="absolute left-1/2 top-0 h-full w-1/3 -skew-x-12 bg-white/5 pointer-events-none" />
 
             <div className="relative z-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
 
               <div>
-                <div className="mb-3 flex w-fit items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur">
+                <div className="mb-3 flex w-fit items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 sm:px-4 py-1.5 text-xs font-semibold text-white backdrop-blur">
                   <Sparkles className="h-4 w-4" />
-                  DRIVE SMART WITH DRIVEHUB
+                  <span>DRIVE SMART WITH DRIVEHUB</span>
                 </div>
 
-                <h1 className="font-display text-3xl font-bold text-white sm:text-4xl">
+                <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
                   Welcome back, {firstName}! 👋
                 </h1>
 
-                <p className="mt-3 max-w-xl text-sm leading-6 text-white/80 sm:text-base">
+                <p className="mt-2.5 max-w-xl text-xs sm:text-base leading-6 text-white/80">
                   Find the right vehicle for every journey. Browse,
                   compare, and book your next ride easily with DriveHub.
                 </p>
               </div>
 
-              <Link to="/vehicles">
-                <button className="flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-[#6d367c] shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+              <Link to="/vehicles" className="w-full sm:w-auto">
+                <button className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-[#6d367c] shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer">
                   <Search className="h-4 w-4" />
-                  Explore Vehicles
+                  <span>Explore Vehicles</span>
                 </button>
               </Link>
 
@@ -171,34 +171,36 @@ export default function CustomerDashboard() {
           </section>
 
           {/* Dashboard Heading */}
-          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
 
             <div>
-              <h2 className="font-display text-2xl font-bold text-ink">
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-ink">
                 Your Dashboard
               </h2>
 
-              <p className="mt-1 text-sm text-slate">
+              <p className="mt-1 text-xs sm:text-sm text-slate">
                 Track your bookings, trips, and account activity.
               </p>
             </div>
 
-            <Badge
-              tone={
-                user?.isEmailVerified
-                  ? 'success'
-                  : 'warning'
-              }
-            >
-              {user?.isEmailVerified
-                ? '✓ Email verified'
-                : 'Email unverified'}
-            </Badge>
+            <div className="self-start sm:self-auto">
+              <Badge
+                tone={
+                  user?.isEmailVerified
+                    ? 'success'
+                    : 'warning'
+                }
+              >
+                {user?.isEmailVerified
+                  ? '✓ Email verified'
+                  : 'Email unverified'}
+              </Badge>
+            </div>
 
           </div>
 
           {/* Statistics Cards */}
-          <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
             {stats.map((stat) => {
               const Icon = stat.icon;
@@ -206,15 +208,15 @@ export default function CustomerDashboard() {
               return (
                 <div
                   key={stat.label}
-                  className="group rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="group rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                 >
 
                   <div className="flex items-start justify-between">
 
                     <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-xl ${stat.iconClass}`}
+                      className={`flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-xl ${stat.iconClass}`}
                     >
-                      <Icon className="h-6 w-6" />
+                      <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                     </div>
 
                     <span className="rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate">
@@ -223,15 +225,15 @@ export default function CustomerDashboard() {
 
                   </div>
 
-                  <p className="mt-5 text-xs font-bold uppercase tracking-wider text-slate">
+                  <p className="mt-4 sm:mt-5 text-xs font-bold uppercase tracking-wider text-slate">
                     {stat.label}
                   </p>
 
-                  <h3 className="mt-2 text-3xl font-extrabold text-ink">
+                  <h3 className="mt-1.5 sm:mt-2 text-2xl sm:text-3xl font-extrabold text-ink truncate">
                     {stat.value}
                   </h3>
 
-                  <p className="mt-2 text-xs text-slate">
+                  <p className="mt-1.5 sm:mt-2 text-xs text-slate">
                     {stat.description}
                   </p>
 
@@ -245,44 +247,44 @@ export default function CustomerDashboard() {
           <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
 
             {/* Quick Actions */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm xl:col-span-2">
 
               <div className="flex items-center justify-between">
 
                 <div>
-                  <h2 className="text-lg font-bold text-ink">
+                  <h2 className="text-base sm:text-lg font-bold text-ink">
                     Quick Actions
                   </h2>
 
-                  <p className="mt-1 text-sm text-slate">
+                  <p className="mt-1 text-xs sm:text-sm text-slate">
                     Everything you need for your next journey.
                   </p>
                 </div>
 
-                <Car className="h-8 w-8 text-[#8b4d9b]/30" />
+                <Car className="h-7 w-7 sm:h-8 sm:w-8 text-[#8b4d9b]/30 flex-shrink-0" />
 
               </div>
 
-              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="mt-5 sm:mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
 
                 <Link
                   to="/vehicles"
-                  className="group rounded-2xl border border-[#8b4d9b]/15 bg-gradient-to-br from-[#f9effa] to-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                  className="group rounded-2xl border border-[#8b4d9b]/15 bg-gradient-to-br from-[#f9effa] to-white p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                 >
 
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#8b4d9b] text-white">
+                  <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-[#8b4d9b] text-white">
                     <Car className="h-5 w-5" />
                   </div>
 
-                  <h3 className="mt-4 font-bold text-ink">
+                  <h3 className="mt-3 sm:mt-4 font-bold text-ink">
                     Find a Vehicle
                   </h3>
 
-                  <p className="mt-1 text-sm leading-5 text-slate">
+                  <p className="mt-1 text-xs sm:text-sm leading-5 text-slate">
                     Browse available vehicles and book your next ride.
                   </p>
 
-                  <span className="mt-4 inline-block text-sm font-bold text-[#7c3f8c]">
+                  <span className="mt-3 sm:mt-4 inline-block text-xs sm:text-sm font-bold text-[#7c3f8c]">
                     Browse vehicles →
                   </span>
 
@@ -290,22 +292,22 @@ export default function CustomerDashboard() {
 
                 <Link
                   to="/customer/bookings"
-                  className="group rounded-2xl border border-sky-100 bg-gradient-to-br from-sky-50 to-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                  className="group rounded-2xl border border-sky-100 bg-gradient-to-br from-sky-50 to-white p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                 >
 
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-600 text-white">
+                  <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-sky-600 text-white">
                     <CalendarDays className="h-5 w-5" />
                   </div>
 
-                  <h3 className="mt-4 font-bold text-ink">
+                  <h3 className="mt-3 sm:mt-4 font-bold text-ink">
                     My Bookings
                   </h3>
 
-                  <p className="mt-1 text-sm leading-5 text-slate">
+                  <p className="mt-1 text-xs sm:text-sm leading-5 text-slate">
                     View your upcoming and previous vehicle bookings.
                   </p>
 
-                  <span className="mt-4 inline-block text-sm font-bold text-sky-700">
+                  <span className="mt-3 sm:mt-4 inline-block text-xs sm:text-sm font-bold text-sky-700">
                     View bookings →
                   </span>
 
@@ -316,12 +318,12 @@ export default function CustomerDashboard() {
             </div>
 
             {/* Account Status */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
 
               <div className="flex items-center gap-3">
 
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-                  <ShieldCheck className="h-6 w-6" />
+                <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 flex-shrink-0">
+                  <ShieldCheck className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
 
                 <div>
@@ -336,7 +338,7 @@ export default function CustomerDashboard() {
 
               </div>
 
-              <div className="mt-7 space-y-5">
+              <div className="mt-5 sm:mt-7 space-y-4 sm:space-y-5">
 
                 <div className="flex items-center justify-between">
 
@@ -344,7 +346,7 @@ export default function CustomerDashboard() {
 
                     <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
 
-                    <span className="text-sm font-medium text-ink">
+                    <span className="text-xs sm:text-sm font-medium text-ink">
                       Account created
                     </span>
 
@@ -366,7 +368,7 @@ export default function CustomerDashboard() {
                       }`}
                     />
 
-                    <span className="text-sm font-medium text-ink">
+                    <span className="text-xs sm:text-sm font-medium text-ink">
                       Email verification
                     </span>
 
@@ -380,22 +382,22 @@ export default function CustomerDashboard() {
 
                 </div>
 
-                <div className="border-t border-slate-100 pt-5">
+                <div className="border-t border-slate-100 pt-4 sm:pt-5">
 
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate">
+                  <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate">
                     DriveHub Benefits
                   </p>
 
-                  <div className="mt-4 space-y-3">
+                  <div className="mt-3 sm:mt-4 space-y-2.5 sm:space-y-3">
 
-                    <div className="flex items-center gap-2 text-sm text-slate">
-                      <MapPin className="h-4 w-4 text-[#8b4d9b]" />
-                      Easy vehicle discovery
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-slate">
+                      <MapPin className="h-4 w-4 text-[#8b4d9b] flex-shrink-0" />
+                      <span>Easy vehicle discovery</span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm text-slate">
-                      <CreditCard className="h-4 w-4 text-[#8b4d9b]" />
-                      Secure booking process
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-slate">
+                      <CreditCard className="h-4 w-4 text-[#8b4d9b] flex-shrink-0" />
+                      <span>Secure booking process</span>
                     </div>
 
                   </div>
@@ -411,22 +413,22 @@ export default function CustomerDashboard() {
           {/* Empty Booking Section */}
           {analytics && analytics.totalBookings === 0 && (
 
-            <section className="rounded-3xl border border-dashed border-[#8b4d9b]/30 bg-gradient-to-r from-[#fbf3fc] via-white to-[#f7eff9] p-8 text-center shadow-sm">
+            <section className="rounded-2xl sm:rounded-3xl border border-dashed border-[#8b4d9b]/30 bg-gradient-to-r from-[#fbf3fc] via-white to-[#f7eff9] p-5 sm:p-8 text-center shadow-sm">
 
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#8b4d9b]/10 text-[#7c3f8c]">
-                <Car className="h-8 w-8" />
+              <div className="mx-auto flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-[#8b4d9b]/10 text-[#7c3f8c]">
+                <Car className="h-7 w-7 sm:h-8 sm:w-8" />
               </div>
 
-              <h2 className="mt-5 text-xl font-bold text-ink">
+              <h2 className="mt-4 sm:mt-5 text-lg sm:text-xl font-bold text-ink">
                 Ready for your first journey?
               </h2>
 
-              <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate">
+              <p className="mx-auto mt-2 max-w-lg text-xs sm:text-sm leading-6 text-slate">
                 You have not booked a vehicle yet. Explore DriveHub
                 and find the perfect vehicle for your next trip.
               </p>
 
-              <div className="mt-6">
+              <div className="mt-5 sm:mt-6">
 
                 <Link to="/vehicles">
 

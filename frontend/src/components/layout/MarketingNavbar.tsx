@@ -187,8 +187,8 @@ export function MarketingNavbar() {
           })}
         </nav>
 
-        {/* Right Side: Primary CTA & Auth State Actions */}
-        <div className="hidden sm:flex items-center gap-2.5">
+        {/* Right Side: Primary CTA & Auth State Actions (Desktop) */}
+        <div className="hidden lg:flex items-center gap-2.5">
           {/* Primary Automotive Rental CTA Button */}
           <Link
             to={user ? '/vehicles' : '/register'}
@@ -255,7 +255,7 @@ export function MarketingNavbar() {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-2 rounded-xl px-3 py-2 text-red-400 hover:bg-red-500/15 hover:text-red-300 transition-colors text-left mt-1 border-t border-white/10 pt-2"
+                    className="w-full flex items-center gap-2 rounded-xl px-3 py-2 text-red-400 hover:bg-red-500/15 hover:text-red-300 transition-colors text-left mt-1 border-t border-white/10 pt-2 cursor-pointer"
                   >
                     <LogOut className="h-4 w-4" />
                     <span>Sign out</span>
@@ -282,8 +282,8 @@ export function MarketingNavbar() {
           )}
         </div>
 
-        {/* Mobile Hamburger Button */}
-        <div className="flex sm:hidden items-center gap-2">
+        {/* Mobile & Tablet Hamburger Button & Quick CTA */}
+        <div className="flex lg:hidden items-center gap-2">
           <Link
             to={user ? '/vehicles' : '/register'}
             state={
@@ -303,7 +303,7 @@ export function MarketingNavbar() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen((v) => !v)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-white transition-colors hover:bg-white/20"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-white transition-colors hover:bg-white/20 cursor-pointer"
             aria-label="Toggle Navigation Menu"
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -311,9 +311,9 @@ export function MarketingNavbar() {
         </div>
       </div>
 
-      {/* Mobile Drawer / Glass Menu */}
+      {/* Mobile & Tablet Drawer / Glass Menu */}
       {mobileMenuOpen && (
-        <div className="border-t border-white/15 bg-black/90 p-5 backdrop-blur-2xl sm:hidden">
+        <div className="border-t border-white/15 bg-black/95 p-4 sm:p-5 backdrop-blur-2xl lg:hidden max-h-[85vh] overflow-y-auto">
           <nav className="flex flex-col gap-1.5">
             {NAV_ITEMS.map((item) => {
               const isActive = isItemActive(item);
@@ -356,7 +356,7 @@ export function MarketingNavbar() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-400 text-center"
+                  className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-400 text-center cursor-pointer"
                 >
                   Log out
                 </button>

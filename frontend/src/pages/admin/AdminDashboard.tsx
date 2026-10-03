@@ -45,7 +45,7 @@ export default function AdminDashboard() {
         <p className="mt-1 text-sm text-slate">Users, vehicles, and revenue across DriveHub.</p>
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-4">
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total users" value={String(analytics?.totalUsers ?? '—')} />
         <StatCard label="Vehicle owners" value={String(analytics?.usersByRole.owner ?? 0)} />
         <StatCard label="Listed vehicles" value={String(analytics?.totalVehicles ?? '—')} />
@@ -56,9 +56,9 @@ export default function AdminDashboard() {
       </div>
 
       {analytics && (
-        <div className="mt-6 rounded-2xl border border-paper-line bg-paper-soft p-5">
+        <div className="mt-6 rounded-2xl border border-paper-line bg-paper-soft p-4 sm:p-5 min-w-0">
           <h2 className="font-display text-base font-semibold text-ink">Revenue, last 6 months</h2>
-          <div className="mt-2">
+          <div className="mt-2 min-w-0">
             <RevenueChart data={analytics.monthlyRevenue} />
           </div>
         </div>

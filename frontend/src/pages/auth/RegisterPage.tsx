@@ -61,7 +61,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 py-12 text-white selection:bg-route selection:text-white">
+    <main className="relative min-h-screen flex items-center justify-center overflow-hidden px-3.5 sm:px-4 py-8 sm:py-12 text-white selection:bg-route selection:text-white">
       {/* Full-Screen Scenic Cinematic Background */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
         <img
@@ -81,7 +81,7 @@ export default function RegisterPage() {
         <div className="auth-border-glow" aria-hidden="true" />
 
         {/* Glassmorphic Authentication Card */}
-        <section className="relative w-full rounded-[30.5px] bg-[#0c111a]/60 backdrop-blur-2xl border border-white/20 p-7 sm:p-9">
+        <section className="relative w-full rounded-[30.5px] bg-[#0c111a]/60 backdrop-blur-2xl border border-white/20 p-5 sm:p-9">
           {/* Brand Logo */}
           <div className="mb-4 flex justify-center">
             <Link to="/" className="transition-transform duration-300 hover:scale-105">
@@ -95,10 +95,10 @@ export default function RegisterPage() {
 
           {/* Heading & Subtitle */}
           <div className="mb-5 text-left">
-            <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
               Create Account
             </h1>
-            <p className="mt-1 text-sm text-white/75">
+            <p className="mt-1 text-xs sm:text-sm text-white/75">
               Join DriveHub to rent vehicles or start earning today
             </p>
           </div>

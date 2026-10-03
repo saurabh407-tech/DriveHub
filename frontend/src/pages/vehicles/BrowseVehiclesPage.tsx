@@ -48,20 +48,6 @@ export default function BrowseVehiclesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // If session is bootstrapped and user is not authenticated, redirect to register with alert
-  if (bootstrapped && !user) {
-    return (
-      <Navigate
-        to="/register"
-        state={{
-          from: location.pathname,
-          alert: 'Please sign up or log in first to view listed vehicles. Account creation is required to browse our fleet.',
-        }}
-        replace
-      />
-    );
-  }
-
   useEffect(() => {
     let cancelled = false;
     setIsLoading(true);
@@ -93,17 +79,31 @@ export default function BrowseVehiclesPage() {
     setFilters({ page: 1, limit: 12 });
   };
 
+  // If session is bootstrapped and user is not authenticated, redirect to register with alert
+  if (bootstrapped && !user) {
+    return (
+      <Navigate
+        to="/register"
+        state={{
+          from: location.pathname,
+          alert: 'Please sign up or log in first to view listed vehicles. Account creation is required to browse our fleet.',
+        }}
+        replace
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f8f4fa] via-[#faefe0] to-[#eee8f2] text-[#2d163d]">
       {/* ================= TOP NAVIGATION BAR ================= */}
       <header className="sticky top-0 z-30 border-b border-[#8b4d9b]/15 bg-white/85 backdrop-blur-xl shadow-xs">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 gap-2">
           {/* Left: Back Button & Single Brand Logo */}
-          <div className="flex items-center gap-3 sm:gap-5">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button
               type="button"
               onClick={() => navigate(mainDashboardPath)}
-              className="inline-flex items-center gap-2 rounded-2xl border border-[#8b4d9b]/20 bg-gradient-to-r from-[#2d163d] to-[#4b235e] px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-md shadow-purple-950/20 transition-all hover:scale-[1.02] hover:from-[#3d1952] hover:to-[#5b2c6f] active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1.5 sm:gap-2 rounded-2xl border border-[#8b4d9b]/20 bg-gradient-to-r from-[#2d163d] to-[#4b235e] px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-md shadow-purple-950/20 transition-all hover:scale-[1.02] hover:from-[#3d1952] hover:to-[#5b2c6f] active:scale-95 cursor-pointer flex-shrink-0"
               title="Return to Dashboard"
             >
               <ArrowLeft className="h-4 w-4 text-[#ffc15a]" />
@@ -114,20 +114,20 @@ export default function BrowseVehiclesPage() {
             {/* Clean Single Logo */}
             <Link
               to={mainDashboardPath}
-              className="flex items-center gap-2.5 transition-transform hover:scale-105"
+              className="flex items-center gap-2 transition-transform hover:scale-105 min-w-0"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#ffc45d] via-[#ff9f2d] to-[#f56a3d] shadow-md shadow-orange-950/20">
+              <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#ffc45d] via-[#ff9f2d] to-[#f56a3d] shadow-md shadow-orange-950/20 flex-shrink-0">
                 <img
                   src="/drivehub-logo.png"
                   alt="DriveHub Logo"
-                  className="h-7 w-auto object-contain"
+                  className="h-6 w-auto sm:h-7 object-contain"
                 />
               </div>
-              <div>
-                <h1 className="font-display text-lg sm:text-xl font-extrabold tracking-wide text-[#2d163d] leading-none">
+              <div className="hidden xs:block min-w-0">
+                <h1 className="font-display text-base sm:text-xl font-extrabold tracking-wide text-[#2d163d] leading-none truncate">
                   Drive<span className="text-[#f56a3d]">Hub</span>
                 </h1>
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#7c3f8c] mt-0.5">
+                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#7c3f8c] mt-0.5 truncate">
                   Verified Fleet
                 </p>
               </div>
@@ -135,18 +135,18 @@ export default function BrowseVehiclesPage() {
           </div>
 
           {/* Right: Dashboard Link & User Pill */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
             <Link
               to={mainDashboardPath}
-              className="rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold text-[#4b235e] hover:bg-[#8b4d9b]/10 transition-all border border-transparent hover:border-[#8b4d9b]/20"
+              className="rounded-xl px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-[#4b235e] hover:bg-[#8b4d9b]/10 transition-all border border-transparent hover:border-[#8b4d9b]/20"
             >
               Dashboard
             </Link>
 
             {user && (
-              <div className="flex items-center gap-2 rounded-full border border-[#8b4d9b]/20 bg-white/95 px-3.5 py-1.5 text-xs font-bold text-[#2d163d] shadow-xs">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="truncate max-w-[120px] sm:max-w-none">{user.name}</span>
+              <div className="flex items-center gap-1.5 rounded-full border border-[#8b4d9b]/20 bg-white/95 px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-xs font-bold text-[#2d163d] shadow-xs">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+                <span className="truncate max-w-[70px] xs:max-w-[110px] sm:max-w-none">{user.name}</span>
               </div>
             )}
           </div>
@@ -154,24 +154,24 @@ export default function BrowseVehiclesPage() {
       </header>
 
       {/* ================= MAIN CONTAINER ================= */}
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
+      <main className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 sm:space-y-8">
         <FadeIn>
           {/* ================= 1. LUXURY PURPLE HERO BANNER (MATCHES DASHBOARD) ================= */}
-          <section className="relative overflow-hidden rounded-3xl border border-white/70 bg-gradient-to-r from-[#5b2c6f] via-[#7c3f8c] to-[#a85db4] p-6 sm:p-9 shadow-xl text-white">
+          <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/70 bg-gradient-to-r from-[#5b2c6f] via-[#7c3f8c] to-[#a85db4] p-5 sm:p-7 lg:p-9 shadow-xl text-white">
             {/* Ambient decorative glowing elements */}
             <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-xl pointer-events-none" />
             <div className="absolute -bottom-20 right-32 h-52 w-52 rounded-full bg-white/10 blur-lg pointer-events-none" />
             <div className="absolute left-1/2 top-0 h-full w-1/3 -skew-x-12 bg-white/5 pointer-events-none" />
 
-            <div className="relative z-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
+            <div className="relative z-10 flex flex-col justify-between gap-5 sm:gap-6 lg:flex-row lg:items-center">
               <div>
                 {/* Drive Smart Pill Badge */}
-                <div className="mb-3.5 flex w-fit items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-1.5 text-xs font-bold text-white backdrop-blur shadow-sm">
+                <div className="mb-3 flex w-fit items-center gap-2 rounded-full border border-white/25 bg-white/15 px-3.5 sm:px-4 py-1.5 text-xs font-bold text-white backdrop-blur shadow-sm">
                   <Sparkles className="h-3.5 w-3.5 text-[#ffc15a]" />
                   <span>DRIVE SMART WITH DRIVEHUB</span>
                 </div>
 
-                <h1 className="font-display text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
                   Find a vehicle to rent <span className="inline-block animate-bounce">🚗</span>
                 </h1>
 
@@ -182,15 +182,15 @@ export default function BrowseVehiclesPage() {
 
               {/* Verified Fleet Metric Card */}
               <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-3.5 rounded-2xl bg-white/15 px-5 py-3.5 backdrop-blur-md border border-white/20 shadow-md">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#ffc45d] via-[#ff9f2d] to-[#f56a3d] text-white shadow-md font-extrabold text-lg">
+                <div className="flex items-center gap-3 rounded-2xl bg-white/15 px-4 py-3 sm:px-5 sm:py-3.5 backdrop-blur-md border border-white/20 shadow-md">
+                  <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#ffc45d] via-[#ff9f2d] to-[#f56a3d] text-white shadow-md font-extrabold text-base sm:text-lg flex-shrink-0">
                     ✨
                   </div>
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-purple-200">
+                    <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-purple-200">
                       Live Inventory
                     </p>
-                    <p className="text-base sm:text-lg font-extrabold text-white">
+                    <p className="text-sm sm:text-base lg:text-lg font-extrabold text-white">
                       {vehicles.length > 0 ? `${vehicles.length} Vehicles Listed` : 'Verified Fleet'}
                     </p>
                   </div>

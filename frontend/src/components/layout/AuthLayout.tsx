@@ -14,17 +14,17 @@ export function AuthLayout({
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-12 bg-black text-white selection:bg-route selection:text-white">
       {/* Form panel */}
-      <div className="lg:col-span-6 xl:col-span-5 flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 relative overflow-hidden">
+      <div className="lg:col-span-6 xl:col-span-5 flex flex-col justify-center px-3.5 sm:px-12 lg:px-16 py-8 sm:py-12 relative overflow-hidden">
         {/* Subtle Ambient Glow */}
         <div className="absolute -top-24 -left-24 h-80 w-80 rounded-full bg-amber-500/10 blur-[100px] pointer-events-none" />
 
-        <div className="mx-auto w-full max-w-md relative z-10 rounded-3xl border border-white/20 bg-black/60 p-7 sm:p-9 backdrop-blur-2xl shadow-[0_25px_60px_rgba(0,0,0,0.85)]">
+        <div className="mx-auto w-full max-w-md relative z-10 rounded-3xl border border-white/20 bg-black/60 p-5 sm:p-9 backdrop-blur-2xl shadow-[0_25px_60px_rgba(0,0,0,0.85)]">
           <div className="mb-6 flex justify-center">
             <Link to="/" className="transition-transform hover:scale-105">
               <img
                 src="/drivehub-logo.png"
                 alt="DriveHub Logo"
-                className="h-12 w-auto object-contain drop-shadow"
+                className="h-10 sm:h-12 w-auto object-contain drop-shadow"
               />
             </Link>
           </div>

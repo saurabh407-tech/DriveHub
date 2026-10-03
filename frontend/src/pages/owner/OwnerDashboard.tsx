@@ -22,17 +22,17 @@ export default function OwnerDashboard() {
   return (
     <DashboardLayout>
       <FadeIn>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-semibold text-ink">Fleet overview</h1>
           <p className="mt-1 text-sm text-slate">Welcome back, {user?.name?.split(' ')[0]}.</p>
         </div>
-        <Link to="/owner/vehicles/new">
+        <Link to="/owner/vehicles/new" className="self-start sm:self-auto">
           <Button size="sm">+ Add vehicle</Button>
         </Link>
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-4">
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Listed vehicles" value={String(analytics?.vehicleCount ?? '—')} />
         <StatCard label="Active bookings" value={String(analytics?.activeBookings ?? '—')} />
         <StatCard
@@ -43,9 +43,9 @@ export default function OwnerDashboard() {
       </div>
 
       {analytics && (
-        <div className="mt-6 rounded-2xl border border-paper-line bg-paper-soft p-5">
+        <div className="mt-6 rounded-2xl border border-paper-line bg-paper-soft p-4 sm:p-5 min-w-0">
           <h2 className="font-display text-base font-semibold text-ink">Revenue, last 6 months</h2>
-          <div className="mt-2">
+          <div className="mt-2 min-w-0">
             <RevenueChart data={analytics.monthlyRevenue} />
           </div>
         </div>
@@ -66,20 +66,20 @@ export default function OwnerDashboard() {
             </div>
           </div>
         ) : (
-          <div className="mt-3 flex flex-col gap-2">
+          <div className="mt-3 flex flex-col gap-2.5">
             {analytics?.recentBookings.map((b) => (
               <Link
                 key={b._id}
                 to={`/bookings/${b._id}`}
-                className="flex items-center justify-between rounded-xl border border-paper-line bg-paper-soft p-4 hover:shadow-sm"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-paper-line bg-paper-soft p-4 hover:shadow-sm"
               >
-                <div>
-                  <p className="text-sm font-medium text-ink">{b.vehicle.title}</p>
-                  <p className="text-xs text-slate">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-ink truncate">{b.vehicle.title}</p>
+                  <p className="text-xs text-slate truncate">
                     {b.customer.name} · {b.bookingCode}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between sm:justify-end gap-3 flex-shrink-0">
                   <span className="text-sm font-semibold text-ink">₹{b.pricing.totalAmount.toLocaleString('en-IN')}</span>
                   <Badge tone={BOOKING_STATUS_TONE[b.status as keyof typeof BOOKING_STATUS_TONE]}>
                     {BOOKING_STATUS_LABEL[b.status as keyof typeof BOOKING_STATUS_LABEL]}

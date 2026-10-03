@@ -68,35 +68,35 @@ export default function CustomerBookingsPage() {
         <div className="space-y-7">
 
           {/* Premium Header */}
-          <section className="relative overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-r from-[#5b2c6f] via-[#7c3f8c] to-[#a85db4] p-7 shadow-xl sm:p-9">
+          <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/60 bg-gradient-to-r from-[#5b2c6f] via-[#7c3f8c] to-[#a85db4] p-5 sm:p-7 lg:p-9 shadow-xl">
 
             {/* Decorative background */}
-            <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-white/10" />
-            <div className="absolute -bottom-24 right-28 h-56 w-56 rounded-full bg-white/10" />
-            <div className="absolute left-[45%] top-0 h-full w-40 -skew-x-12 bg-white/5" />
+            <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-white/10 pointer-events-none" />
+            <div className="absolute -bottom-24 right-28 h-56 w-56 rounded-full bg-white/10 pointer-events-none" />
+            <div className="absolute left-[45%] top-0 h-full w-40 -skew-x-12 bg-white/5 pointer-events-none" />
 
             <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
 
               <div>
-                <div className="mb-3 flex w-fit items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-bold tracking-wide text-white backdrop-blur">
+                <div className="mb-3 flex w-fit items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 sm:px-4 py-1.5 text-xs font-bold tracking-wide text-white backdrop-blur">
                   <Sparkles className="h-4 w-4" />
-                  DRIVEHUB JOURNEYS
+                  <span>DRIVEHUB JOURNEYS</span>
                 </div>
 
-                <h1 className="font-display text-3xl font-bold text-white sm:text-4xl">
+                <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
                   Your Bookings
                 </h1>
 
-                <p className="mt-3 max-w-xl text-sm leading-6 text-white/80 sm:text-base">
+                <p className="mt-2.5 max-w-xl text-xs sm:text-base leading-6 text-white/80">
                   Manage your upcoming rides, review past journeys,
                   and keep track of every vehicle booking in one place.
                 </p>
               </div>
 
-              <Link to="/vehicles">
-                <button className="flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-[#6d367c] shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+              <Link to="/vehicles" className="w-full sm:w-auto">
+                <button className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-[#6d367c] shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer">
                   <Search className="h-4 w-4" />
-                  Find a Vehicle
+                  <span>Find a Vehicle</span>
                 </button>
               </Link>
 

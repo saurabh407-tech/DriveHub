@@ -38,12 +38,12 @@ export default function OwnerVehiclesPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-semibold text-ink">Your vehicles</h1>
           <p className="mt-1 text-sm text-slate">Manage listings, photos, and documents.</p>
         </div>
-        <Link to="/owner/vehicles/new">
+        <Link to="/owner/vehicles/new" className="self-start sm:self-auto">
           <Button>+ Add vehicle</Button>
         </Link>
       </div>

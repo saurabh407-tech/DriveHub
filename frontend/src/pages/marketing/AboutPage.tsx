@@ -18,8 +18,8 @@ const VALUES = [
 export default function AboutPage() {
   return (
     <MarketingLayout>
-      <section className="mx-auto max-w-5xl px-6 py-24">
-        <div className="rounded-3xl section-translucent-container p-8 sm:p-14 glitter-border-box relative overflow-hidden">
+      <section className="mx-auto max-w-5xl px-3.5 sm:px-6 py-12 sm:py-24">
+        <div className="rounded-3xl section-translucent-container p-5 sm:p-10 lg:p-14 glitter-border-box relative overflow-hidden">
           {/* Subtle ambient warm lighting accents */}
           <div className="absolute -top-24 -left-24 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />

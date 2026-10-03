@@ -110,7 +110,7 @@ export function NotificationBell() {
             transition={{ duration: 0.15, ease: 'easeOut' }}
             role="dialog"
             aria-label="Notifications"
-            className="absolute right-0 top-12 z-50 w-80 sm:w-96 rounded-2xl border border-paper-line bg-white shadow-2xl"
+            className="absolute -right-8 xs:-right-4 sm:right-0 top-12 z-50 w-[calc(100vw-24px)] max-w-sm sm:w-96 rounded-2xl border border-paper-line bg-white shadow-2xl"
           >
             <div className="flex items-center justify-between border-b border-paper-line px-4 py-3">
               <span className="text-sm font-semibold text-ink">Notifications</span>

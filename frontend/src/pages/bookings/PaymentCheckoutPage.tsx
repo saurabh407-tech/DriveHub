@@ -215,22 +215,23 @@ export default function PaymentCheckoutPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#f8f4fa] via-[#faefe0] to-[#eee8f2] text-[#2d163d]">
       {/* ================= STICKY TOP NAV ================= */}
       <header className="sticky top-0 z-30 border-b border-[#8b4d9b]/15 bg-white/85 backdrop-blur-xl shadow-xs">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3">
           <button
             type="button"
             onClick={() => navigate(mainDashboardPath)}
-            className="inline-flex items-center gap-2 rounded-2xl border border-[#8b4d9b]/20 bg-white/90 px-3.5 py-2 text-xs sm:text-sm font-bold text-[#5b2c6f] hover:bg-white hover:border-[#8b4d9b]/35 shadow-xs transition-all active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-1.5 sm:gap-2 rounded-2xl border border-[#8b4d9b]/20 bg-white/90 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-[#5b2c6f] hover:bg-white hover:border-[#8b4d9b]/35 shadow-xs transition-all active:scale-95 cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4 text-[#ea580c]" />
-            <span>Back to Main Page</span>
+            <span className="hidden sm:inline">Back to Main Page</span>
+            <span className="sm:hidden">Back</span>
           </button>
 
-          <Link to={mainDashboardPath} className="flex items-center gap-2.5 transition-transform hover:scale-105">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#ffc45d] via-[#ff9f2d] to-[#f56a3d] shadow-md shadow-orange-950/20">
-              <img src="/drivehub-logo.png" alt="DriveHub" className="h-7 w-auto object-contain" />
+          <Link to={mainDashboardPath} className="flex items-center gap-2 sm:gap-2.5 transition-transform hover:scale-105">
+            <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#ffc45d] via-[#ff9f2d] to-[#f56a3d] shadow-md shadow-orange-950/20">
+              <img src="/drivehub-logo.png" alt="DriveHub" className="h-5 sm:h-7 w-auto object-contain" />
             </div>
             <div>
-              <span className="font-display text-lg sm:text-xl font-extrabold tracking-wide text-[#2d163d] leading-none">
+              <span className="font-display text-base sm:text-xl font-extrabold tracking-wide text-[#2d163d] leading-none">
                 Drive<span className="text-[#f56a3d]">Hub</span>
               </span>
               <span className="hidden sm:block text-[9px] font-bold uppercase tracking-[0.2em] text-[#7c3f8c] mt-0.5">
@@ -247,7 +248,7 @@ export default function PaymentCheckoutPage() {
       </header>
 
       {/* ================= MAIN CONTENT ================= */}
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-6xl px-3 sm:px-6 lg:px-8 py-5 sm:py-8">
         {/* Progress Stepper Banner */}
         <div className="mb-8 rounded-3xl border border-white/60 bg-gradient-to-r from-[#240e34] via-[#3a1850] to-[#1c0829] p-6 text-white shadow-xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

@@ -90,7 +90,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 py-12 text-white selection:bg-route selection:text-white">
+    <main className="relative min-h-screen flex items-center justify-center overflow-hidden px-3.5 sm:px-4 py-8 sm:py-12 text-white selection:bg-route selection:text-white">
       {/* Full-Screen Scenic Cinematic Background */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
         <img
@@ -108,7 +108,7 @@ export default function ResetPasswordPage() {
         <div className="auth-border-glow" aria-hidden="true" />
 
         {/* Clean, Centered Glassmorphic Card */}
-        <section className="relative w-full rounded-[30.5px] bg-[#0c111a]/70 backdrop-blur-2xl border border-white/20 p-7 sm:p-9 text-center">
+        <section className="relative w-full rounded-[30.5px] bg-[#0c111a]/70 backdrop-blur-2xl border border-white/20 p-5 sm:p-9 text-center">
           {/* Brand Logo */}
           <div className="mb-5 flex justify-center">
             <Link to="/" className="transition-transform duration-300 hover:scale-105">

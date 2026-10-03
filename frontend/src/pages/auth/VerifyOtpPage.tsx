@@ -163,7 +163,7 @@ export default function VerifyOtpPage() {
   };
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 py-12 text-white selection:bg-route selection:text-white">
+    <main className="relative min-h-screen flex items-center justify-center overflow-hidden px-3.5 sm:px-4 py-8 sm:py-12 text-white selection:bg-route selection:text-white">
       {/* Full-Screen Scenic Cinematic Background */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
         <img
@@ -183,7 +183,7 @@ export default function VerifyOtpPage() {
         <div className="auth-border-glow" aria-hidden="true" />
 
         {/* Clean, Centered Glassmorphic Verification Card */}
-        <section className="relative w-full rounded-[30.5px] bg-[#0c111a]/70 backdrop-blur-2xl border border-white/20 p-7 sm:p-9 text-center">
+        <section className="relative w-full rounded-[30.5px] bg-[#0c111a]/70 backdrop-blur-2xl border border-white/20 p-5 sm:p-9 text-center">
           {/* Brand Logo */}
           <div className="mb-5 flex justify-center">
             <Link to="/" className="transition-transform duration-300 hover:scale-105">
@@ -196,8 +196,8 @@ export default function VerifyOtpPage() {
           </div>
 
           {/* Centered Icon Badge */}
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-400/40 text-amber-400 shadow-lg shadow-amber-500/10">
-            <ShieldCheck className="h-7 w-7" />
+          <div className="mx-auto mb-4 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-400/40 text-amber-400 shadow-lg shadow-amber-500/10">
+            <ShieldCheck className="h-6 w-6 sm:h-7 sm:w-7" />
           </div>
 
           {/* Clean Focused Header */}
@@ -212,7 +212,7 @@ export default function VerifyOtpPage() {
           {/* OTP Input Form */}
           <form onSubmit={onSubmit} className="flex flex-col gap-5">
             {/* 6-Digit OTP Input Boxes */}
-            <div className="flex justify-center items-center gap-2 sm:gap-2.5" onPaste={handlePaste}>
+            <div className="flex justify-center items-center gap-1.5 sm:gap-2.5" onPaste={handlePaste}>
               {digits.map((d, i) => (
                 <input
                   key={i}
@@ -225,7 +225,7 @@ export default function VerifyOtpPage() {
                   inputMode="numeric"
                   maxLength={1}
                   aria-label={`Digit ${i + 1}`}
-                  className={`h-14 w-11 sm:h-14 sm:w-13 rounded-2xl border bg-white/[0.08] backdrop-blur-md text-center font-mono text-2xl font-bold transition-all focus:outline-none ${
+                  className={`h-12 w-9 sm:h-14 sm:w-12 rounded-xl sm:rounded-2xl border bg-white/[0.08] backdrop-blur-md text-center font-mono text-xl sm:text-2xl font-bold transition-all focus:outline-none ${
                     d
                       ? 'border-amber-400 text-amber-300 bg-amber-500/10 shadow-sm shadow-amber-500/20'
                       : 'border-white/20 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30'

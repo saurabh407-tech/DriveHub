@@ -256,7 +256,7 @@ export function LocationPicker({ label, value, onChange, placeholder }: Location
           title="Click anywhere on the map to set location"
         />
       )}
-      <p className="text-[11px] text-slate flex items-center justify-between">
+      <p className="text-[11px] text-slate flex flex-wrap items-center justify-between gap-1">
         <span>Type to see suggestions, click anywhere on map, or drag pin.</span>
         {value.lat && value.lng && (
           <span className="font-mono text-slate/70">

@@ -58,9 +58,9 @@ export default function AdminVehiclesPage() {
           vehicles.map((v) => (
             <div
               key={v._id}
-              className="flex items-center justify-between rounded-2xl border border-paper-line bg-paper-soft p-5"
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-paper-line bg-paper-soft p-4 sm:p-5"
             >
-              <div>
+              <div className="min-w-0">
                 <p className="font-display text-base font-semibold text-ink">{v.title}</p>
                 <p className="mt-1 text-xs text-slate">
                   {v.make} {v.vehicleModel} · {v.year} · {v.location.city}
@@ -73,7 +73,7 @@ export default function AdminVehiclesPage() {
                   {v.images.length === 1 ? '' : 's'}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button size="sm" variant="danger" onClick={() => onReject(v._id)} isLoading={actingOn === v._id}>
                   Reject
                 </Button>

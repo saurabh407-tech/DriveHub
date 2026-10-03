@@ -107,19 +107,6 @@ export default function VehicleDetailPage() {
       : '/customer'
     : '/';
 
-  if (bootstrapped && !user) {
-    return (
-      <Navigate
-        to="/register"
-        state={{
-          from: location.pathname,
-          alert: 'Please sign up or log in first to view listed vehicles. Account creation is required to browse our fleet.',
-        }}
-        replace
-      />
-    );
-  }
-
   const tomorrowISO = () => {
     const d = new Date();
     d.setDate(d.getDate() + 1);
@@ -191,6 +178,19 @@ export default function VehicleDetailPage() {
   }, [startDate, endDate]);
 
   const estimatedTotal = vehicle ? days * vehicle.pricing.perDay + vehicle.pricing.securityDeposit : 0;
+
+  if (bootstrapped && !user) {
+    return (
+      <Navigate
+        to="/register"
+        state={{
+          from: location.pathname,
+          alert: 'Please sign up or log in first to view listed vehicles. Account creation is required to browse our fleet.',
+        }}
+        replace
+      />
+    );
+  }
 
   if (error) {
     return (
@@ -270,33 +270,33 @@ export default function VehicleDetailPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#f8f4fa] via-[#faefe0] to-[#eee8f2] text-[#2d163d]">
       {/* Top Header with Back Buttons */}
       <header className="sticky top-0 z-30 border-b border-[#8b4d9b]/15 bg-white/85 backdrop-blur-xl shadow-xs">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 sm:gap-3">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap">
             <button
               type="button"
               onClick={() => navigate(mainDashboardPath)}
-              className="inline-flex items-center gap-2 rounded-2xl border border-[#8b4d9b]/20 bg-gradient-to-r from-[#2d163d] to-[#4b235e] px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-md shadow-purple-950/20 transition-all hover:scale-[1.02] hover:from-[#3d1952] hover:to-[#5b2c6f] active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1.5 sm:gap-2 rounded-2xl border border-[#8b4d9b]/20 bg-gradient-to-r from-[#2d163d] to-[#4b235e] px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white shadow-md shadow-purple-950/20 transition-all hover:scale-[1.02] hover:from-[#3d1952] hover:to-[#5b2c6f] active:scale-95 cursor-pointer"
               title="Go back to Main Dashboard"
             >
-              <ArrowLeft className="h-4 w-4 text-[#ffc15a]" />
+              <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#ffc15a]" />
               <span className="hidden sm:inline">Back to Main Page</span>
               <span className="sm:hidden">Back</span>
             </button>
 
             <Link
               to="/vehicles"
-              className="inline-flex items-center gap-1.5 rounded-2xl border border-[#8b4d9b]/20 bg-white/90 px-3.5 py-2 text-xs sm:text-sm font-bold text-[#5b2c6f] hover:bg-white hover:border-[#8b4d9b]/35 shadow-xs transition-all"
+              className="inline-flex items-center gap-1 sm:gap-1.5 rounded-2xl border border-[#8b4d9b]/20 bg-white/90 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-[#5b2c6f] hover:bg-white hover:border-[#8b4d9b]/35 shadow-xs transition-all"
             >
-              <span>← Back to Fleet</span>
+              <span>← Fleet</span>
             </Link>
           </div>
 
-          <Link to={mainDashboardPath} className="flex items-center gap-2.5 transition-transform hover:scale-105">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#ffc45d] via-[#ff9f2d] to-[#f56a3d] shadow-md shadow-orange-950/20">
-              <img src="/drivehub-logo.png" alt="DriveHub" className="h-7 w-auto object-contain" />
+          <Link to={mainDashboardPath} className="flex items-center gap-2 sm:gap-2.5 transition-transform hover:scale-105">
+            <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#ffc45d] via-[#ff9f2d] to-[#f56a3d] shadow-md shadow-orange-950/20">
+              <img src="/drivehub-logo.png" alt="DriveHub" className="h-5 sm:h-7 w-auto object-contain" />
             </div>
             <div>
-              <span className="font-display text-lg sm:text-xl font-extrabold tracking-wide text-[#2d163d] leading-none">
+              <span className="font-display text-base sm:text-xl font-extrabold tracking-wide text-[#2d163d] leading-none">
                 Drive<span className="text-[#f56a3d]">Hub</span>
               </span>
               <span className="hidden sm:block text-[9px] font-bold uppercase tracking-[0.2em] text-[#7c3f8c] mt-0.5">
@@ -307,7 +307,7 @@ export default function VehicleDetailPage() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-5 sm:py-8">
 
       <div className="mt-4 grid grid-cols-1 gap-8 lg:grid-cols-5">
         <div className="lg:col-span-3">
@@ -363,7 +363,7 @@ export default function VehicleDetailPage() {
               + ₹{vehicle.pricing.securityDeposit.toLocaleString('en-IN')} refundable security deposit
             </p>
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
                 label="Pickup date"
                 type="date"
@@ -388,7 +388,7 @@ export default function VehicleDetailPage() {
             </div>
 
             <div className="mt-3">
-              <div className="mb-1 flex items-center justify-between text-xs">
+              <div className="mb-1 flex flex-wrap items-center justify-between gap-1 text-xs">
                 <span className="font-semibold text-slate">
                   📍 Vehicle Base City: <strong className="text-ink">{vehicle.location.city}</strong>
                 </span>

@@ -236,16 +236,16 @@ export default function BookingDetailPage() {
   return (
     <DashboardLayout>
       {/* Top Navigation */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white/80 hover:bg-white px-3.5 py-1.5 rounded-lg border border-slate-200/80 shadow-2xs transition-all cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white/80 hover:bg-white px-3 py-1.5 rounded-lg border border-slate-200/80 shadow-2xs transition-all cursor-pointer"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           <span>Back to Bookings</span>
         </button>
 
-        <div className="flex items-center gap-2 text-xs text-slate-500">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-slate-500">
           <span>DriveHub</span>
           <ChevronRight className="h-3 w-3" />
           <span className="font-medium text-slate-900">Reservation #{booking.bookingCode}</span>

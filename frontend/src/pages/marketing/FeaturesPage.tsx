@@ -40,7 +40,7 @@ export default function FeaturesPage() {
 
   return (
     <MarketingLayout>
-      <section className="mx-auto max-w-5xl px-6 py-24">
+      <section className="mx-auto max-w-5xl px-3.5 sm:px-6 py-12 sm:py-24">
         <div className="relative">
           <div className="relative z-10">
             <span className="inline-flex items-center gap-2.5 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-500/25 via-amber-400/15 to-orange-500/20 px-5 py-2 text-xs sm:text-sm font-extrabold uppercase tracking-widest text-amber-200 backdrop-blur-xl shadow-[0_0_20px_rgba(245,158,11,0.25),inset_0_1px_1px_rgba(255,255,255,0.35)]">
