@@ -11,7 +11,7 @@ function setRefreshCookie(res: Response, token: string) {
   res.cookie(REFRESH_COOKIE_NAME, token, {
     httpOnly: true,
     secure: env.isProd,
-    sameSite: 'strict',
+    sameSite: env.isProd ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: '/api/v1/auth',
   });
@@ -69,7 +69,12 @@ export const refresh = asyncHandler(async (req: Request, res: Response) => {
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
   if (req.user) await authService.logoutUser(req.user.id);
-  res.clearCookie(REFRESH_COOKIE_NAME, { path: '/api/v1/auth' });
+  res.clearCookie(REFRESH_COOKIE_NAME, {
+    path: '/api/v1/auth',
+    httpOnly: true,
+    secure: env.isProd,
+    sameSite: env.isProd ? 'none' : 'lax',
+  });
   res.status(200).json({ success: true, message: 'Logged out successfully' });
 });
 

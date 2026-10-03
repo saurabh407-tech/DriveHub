@@ -44,8 +44,10 @@ export function createApp(): Application {
     cors({
       origin: (origin, callback) => {
         if (!origin) return callback(null, true);
+        const isVercel = /\.vercel\.app$/.test(new URL(origin).hostname);
         if (
           allowedOrigins.includes(origin) ||
+          isVercel ||
           (!env.isProd && /^http:\/\/localhost:\d+$/.test(origin))
         ) {
           return callback(null, true);
