@@ -11,6 +11,14 @@ export interface AuthUser {
   isEmailVerified: boolean;
   avatar?: { url: string; publicId: string };
   wallet: { balance: number; currency: string };
+  address?: {
+    line1?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    pincode?: string;
+  };
+  bio?: string;
   createdAt: string;
 }
 

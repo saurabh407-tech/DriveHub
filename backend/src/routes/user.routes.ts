@@ -3,9 +3,13 @@ import { authenticate } from '../middlewares/authenticate';
 import { authorize } from '../middlewares/authorize';
 import { asyncHandler } from '../utils/asyncHandler';
 import { User } from '../models/User.model';
+import { Booking } from '../models/Booking.model';
+import { Vehicle } from '../models/Vehicle.model';
 import { AuditLog } from '../models/AuditLog.model';
 import { ApiError } from '../utils/ApiError';
 import { createNotification } from '../services/notification.service';
+import { uploadImages } from '../middlewares/upload';
+import { uploadBuffer } from '../services/upload.service';
 
 const router = Router();
 
@@ -25,7 +29,7 @@ router.patch(
   authenticate,
   asyncHandler(async (req, res) => {
     // Whitelist updatable fields — never trust the body wholesale (no role/email/password here).
-    const allowed = ['name', 'phone', 'dateOfBirth', 'address', 'emergencyContact'] as const;
+    const allowed = ['name', 'phone', 'dateOfBirth', 'address', 'emergencyContact', 'avatar', 'bio'] as const;
     const updates: Record<string, unknown> = {};
     for (const key of allowed) {
       if (key in req.body) updates[key] = req.body[key];
@@ -36,6 +40,77 @@ router.patch(
     });
     if (!user) throw ApiError.notFound('User not found');
     res.status(200).json({ success: true, message: 'Profile updated', data: { user } });
+  })
+);
+
+// Upload profile avatar
+router.post(
+  '/me/avatar',
+  authenticate,
+  uploadImages.single('avatar'),
+  asyncHandler(async (req, res) => {
+    if (!req.file) throw ApiError.badRequest('No image file provided');
+    const uploaded = await uploadBuffer(req.file.buffer, 'drivehub/avatars', req.file.originalname);
+    const user = await User.findByIdAndUpdate(
+      req.user!.id,
+      { avatar: { url: uploaded.url, publicId: uploaded.publicId } },
+      { new: true }
+    );
+    res.status(200).json({ success: true, message: 'Profile photo updated', data: { user } });
+  })
+);
+
+// Get user profile summary & rental stats (e.g. how many vehicles rented / listed)
+router.get(
+  '/me/stats',
+  authenticate,
+  asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const role = req.user!.role;
+
+    if (role === 'customer') {
+      const bookings = await Booking.find({ customer: userId });
+      const totalRented = bookings.filter((b) => !b.status.startsWith('cancelled') && b.status !== 'rejected').length;
+      const activeRentals = bookings.filter((b) => ['confirmed', 'ongoing'].includes(b.status)).length;
+      const completedRentals = bookings.filter((b) => b.status === 'completed').length;
+      const totalSpent = bookings
+        .filter((b) => ['confirmed', 'ongoing', 'completed'].includes(b.status))
+        .reduce((sum, b) => sum + (b.pricing?.totalAmount || 0), 0);
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          totalRented,
+          activeRentals,
+          completedRentals,
+          totalSpent,
+        },
+      });
+    }
+
+    if (role === 'owner') {
+      const vehicles = await Vehicle.find({ owner: userId, isDeleted: { $ne: true } });
+      const vehicleIds = vehicles.map((v) => v._id);
+      const bookings = await Booking.find({ vehicle: { $in: vehicleIds } });
+      const totalBookings = bookings.filter((b) => !b.status.startsWith('cancelled') && b.status !== 'rejected').length;
+      const activeRentals = bookings.filter((b) => ['confirmed', 'ongoing'].includes(b.status)).length;
+      const totalEarnings = bookings
+        .filter((b) => ['confirmed', 'ongoing', 'completed'].includes(b.status))
+        .reduce((sum, b) => sum + (b.pricing?.totalAmount || 0), 0);
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          totalVehicles: vehicles.length,
+          activeVehicles: vehicles.filter((v) => v.status === 'active').length,
+          totalBookings,
+          activeRentals,
+          totalEarnings,
+        },
+      });
+    }
+
+    res.status(200).json({ success: true, data: {} });
   })
 );
 

@@ -30,6 +30,7 @@ export interface IUser extends Document {
   googleId?: string;
   role: UserRole;
   avatar?: { url: string; publicId: string };
+  bio?: string;
 
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
@@ -123,6 +124,7 @@ const userSchema = new Schema<IUser>(
     googleId: { type: String, index: true, sparse: true },
     role: { type: String, enum: ['customer', 'owner', 'admin'], default: 'customer', index: true },
     avatar: { url: String, publicId: String },
+    bio: { type: String, trim: true, maxlength: 500 },
 
     isEmailVerified: { type: Boolean, default: false },
     isPhoneVerified: { type: Boolean, default: false },

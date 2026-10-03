@@ -35,6 +35,7 @@ const VehicleDetailPage = lazy(() => import('@/pages/vehicles/VehicleDetailPage'
 const BookingDetailPage = lazy(() => import('@/pages/bookings/BookingDetailPage'));
 const PaymentCheckoutPage = lazy(() => import('@/pages/bookings/PaymentCheckoutPage'));
 const MessagesInboxPage = lazy(() => import('@/pages/messages/MessagesInboxPage'));
+const ProfilePage = lazy(() => import('@/pages/profile/ProfilePage'));
 
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 import { RoleRoute } from '@/routes/RoleRoute';
@@ -66,6 +67,7 @@ function App() {
             <Route path="/vehicles/:id" element={<VehicleDetailPage />} />
 
             <Route element={<ProtectedRoute />}>
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="/bookings/:id" element={<BookingDetailPage />} />
               <Route path="/bookings/:id/pay" element={<PaymentCheckoutPage />} />
               <Route element={<RoleRoute allow={['customer', 'owner']} />}>

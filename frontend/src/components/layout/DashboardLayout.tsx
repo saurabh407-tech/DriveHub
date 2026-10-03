@@ -318,37 +318,36 @@ export function DashboardLayout({
           <div className="border-t border-white/10 pt-4">
 
             {/* User Profile */}
-
-            <div className="rounded-2xl border border-white/10 bg-white/10 p-3 backdrop-blur-xl">
-
-              <div className="flex items-center gap-3">
-
-                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#ffc65c] to-[#f47a42] text-base font-extrabold text-[#32193f] shadow-lg">
-
-                  {user?.name?.[0]?.toUpperCase() || '?'}
-
+            <Link
+              to="/profile"
+              className="group flex items-center justify-between rounded-2xl border border-white/10 bg-white/10 p-3 backdrop-blur-xl transition-all duration-300 hover:bg-white/20 hover:border-white/25 hover:shadow-lg cursor-pointer"
+              title="View and edit your profile"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#ffc65c] to-[#f47a42] text-base font-extrabold text-[#32193f] shadow-lg group-hover:scale-105 transition-transform">
+                  {user?.avatar?.url ? (
+                    <img src={user.avatar.url} alt={user.name} className="h-full w-full object-cover" />
+                  ) : (
+                    user?.name?.[0]?.toUpperCase() || '?'
+                  )}
                 </div>
-
 
                 <div className="min-w-0">
-
-                  <p className="truncate text-sm font-bold text-white">
-
+                  <p className="truncate text-sm font-bold text-white group-hover:text-[#ffc65c] transition-colors">
                     {user?.name}
-
                   </p>
-
                   <p className="mt-0.5 truncate text-xs text-purple-200">
-
                     {user?.email}
-
                   </p>
-
                 </div>
-
               </div>
 
-            </div>
+              <div className="text-purple-300 group-hover:text-white transition-colors pl-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                  <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </Link>
 
 
             {/* Logout */}
@@ -416,11 +415,22 @@ export function DashboardLayout({
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div className="hidden rounded-full border border-purple-100 bg-purple-50 px-4 py-2 text-xs font-semibold text-[#6e3d7c] sm:block">
               ✨ Have a great journey
             </div>
             <NotificationBell />
+            <Link
+              to="/profile"
+              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-purple-200 bg-gradient-to-br from-[#ffc65c] to-[#f47a42] text-xs font-extrabold text-[#32193f] shadow-xs hover:scale-105 active:scale-95 transition-transform"
+              title="Your Profile"
+            >
+              {user?.avatar?.url ? (
+                <img src={user.avatar.url} alt={user.name} className="h-full w-full object-cover" />
+              ) : (
+                user?.name?.[0]?.toUpperCase() || '?'
+              )}
+            </Link>
           </div>
         </header>
 
