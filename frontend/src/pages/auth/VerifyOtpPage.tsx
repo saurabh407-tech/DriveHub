@@ -9,10 +9,12 @@ export default function VerifyOtpPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const email = (location.state as { email?: string; from?: string } | null)?.email;
-  const from = (location.state as { from?: string } | null)?.from;
+  const stateData = location.state as { email?: string; from?: string; previewOtp?: string } | null;
+  const email = stateData?.email;
+  const from = stateData?.from;
 
   const [digits, setDigits] = useState<string[]>(Array(6).fill(''));
+  const [activePreviewOtp, setActivePreviewOtp] = useState<string | undefined>(stateData?.previewOtp);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent'>('idle');
@@ -152,7 +154,11 @@ export default function VerifyOtpPage() {
     setResendState('sending');
     setError(null);
     try {
-      await resendOtpRequest(email);
+      const res = await resendOtpRequest(email);
+      const newOtp = (res as any)?.data?.previewOtp;
+      if (newOtp) {
+        setActivePreviewOtp(newOtp);
+      }
       setResendState('sent');
       setResendCountdown(60); // 60 seconds cooldown
     } catch {
@@ -210,6 +216,24 @@ export default function VerifyOtpPage() {
 
           {/* OTP Input Form */}
           <form onSubmit={onSubmit} className="flex flex-col gap-5">
+            {/* Instant verification hint for fast onboarding */}
+            {activePreviewOtp && (
+              <div
+                onClick={() => {
+                  const arr = activePreviewOtp.split('').slice(0, 6);
+                  setDigits(arr);
+                  setError(null);
+                  setTimeout(() => {
+                    inputsRef.current[5]?.focus();
+                  }, 50);
+                }}
+                className="mb-1 cursor-pointer inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-400/35 text-amber-300 text-xs font-semibold hover:bg-amber-500/25 hover:border-amber-400/60 transition-all shadow-sm mx-auto"
+                title="Click to auto-fill code"
+              >
+                <span>⚡ Code: <strong className="font-mono text-sm tracking-wider text-amber-200">{activePreviewOtp}</strong> (Click to auto-fill)</span>
+              </div>
+            )}
+
             {/* 6-Digit OTP Input Boxes */}
             <div className="flex justify-center items-center gap-2 sm:gap-2.5" onPaste={handlePaste}>
               {digits.map((d, i) => (

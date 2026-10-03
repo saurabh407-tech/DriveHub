@@ -18,11 +18,11 @@ function setRefreshCookie(res: Response, token: string) {
 }
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
-  const { user, otpSentTo } = await authService.registerUser(req.body);
+  const { user, otpSentTo, previewOtp } = await authService.registerUser(req.body);
   res.status(201).json({
     success: true,
     message: 'Account created. Please verify your email with the OTP we sent you.',
-    data: { user, otpSentTo },
+    data: { user, otpSentTo, previewOtp },
   });
 });
 
@@ -39,8 +39,12 @@ export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
 
 export const resendOtp = asyncHandler(async (req: Request, res: Response) => {
   const { email } = req.body;
-  await authService.resendOtp(email, 'email_verification');
-  res.status(200).json({ success: true, message: 'A new OTP has been sent to your email.' });
+  const { previewOtp } = await authService.resendOtp(email, 'email_verification');
+  res.status(200).json({
+    success: true,
+    message: 'A new OTP has been sent to your email.',
+    data: { previewOtp },
+  });
 });
 
 export const login = asyncHandler(async (req: Request, res: Response) => {

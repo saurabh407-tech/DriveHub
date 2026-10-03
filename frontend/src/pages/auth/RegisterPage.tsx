@@ -50,10 +50,12 @@ export default function RegisterPage() {
     const result = await dispatch(registerUser(values));
 
     if (registerUser.fulfilled.match(result)) {
+      const previewOtp = (result.payload as any)?.data?.previewOtp;
       navigate('/verify-otp', {
         state: {
           email: values.email,
           from: (location.state as { from?: string } | null)?.from,
+          previewOtp,
         },
         replace: true,
       });

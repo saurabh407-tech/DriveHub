@@ -53,12 +53,50 @@ interface SendEmailInput {
   replyTo?: string;
 }
 
+async function sendViaResend({ to, subject, html, replyTo }: SendEmailInput): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return false;
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: process.env.RESEND_FROM || 'DriveHub <onboarding@resend.dev>',
+        to: [to],
+        subject,
+        html,
+        ...(replyTo ? { reply_to: replyTo } : {}),
+      }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      logger.info(`Resend API: email successfully dispatched to ${to} (${subject})`);
+      return true;
+    } else {
+      logger.error('Resend API returned error, will try SMTP fallback:', data);
+      return false;
+    }
+  } catch (err) {
+    logger.error('Resend API call failed, will try SMTP fallback:', err);
+    return false;
+  }
+}
+
 /**
- * Sends an email via SMTP if configured. In local dev without SMTP
+ * Sends an email via Resend HTTPS API or SMTP if configured. In local dev without SMTP
  * credentials, it logs the email to the console instead of failing,
  * so the auth flow is fully testable without a mail provider.
  */
 export async function sendEmail({ to, subject, html, replyTo }: SendEmailInput): Promise<void> {
+  // 1. Try Resend HTTPS API first (Bypasses Render free tier SMTP blocks)
+  const sentViaResend = await sendViaResend({ to, subject, html, replyTo });
+  if (sentViaResend) return;
+
+  // 2. Fall back to SMTP
   const t = getTransporter();
   if (!t) {
     logger.warn(`SMTP not configured — logging email instead of sending to ${to}`);
